@@ -1,0 +1,1289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crown City Menu Picker (Realtime)</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#101a34; --text:#e9ecf5; --muted:#a9b2c7;
+      --brand:#7c5cff; --good:#22c55e; --danger:#ef4444; --line:rgba(255,255,255,.10);
+      --shadow:0 18px 50px rgba(0,0,0,.35); --radius:18px;
+
+      /* highlight for active-person selected items */
+      --hi: rgba(245, 158, 11, 1);         /* amber */
+      --hiSoft: rgba(245, 158, 11, .22);   /* glow */
+      --hiSoft2: rgba(245, 158, 11, .10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1000px 600px at 10% 10%, rgba(124,92,255,.25), transparent 60%),
+        radial-gradient(1000px 700px at 90% 20%, rgba(34,197,94,.18), transparent 55%),
+        radial-gradient(900px 600px at 30% 90%, rgba(245,158,11,.12), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      position:relative;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      background:
+        radial-gradient(1200px 700px at 15% 25%, rgba(124,92,255,.22), transparent 60%),
+        radial-gradient(1100px 800px at 85% 15%, rgba(34,197,94,.18), transparent 58%),
+        radial-gradient(1000px 700px at 25% 85%, rgba(245,158,11,.14), transparent 60%);
+      opacity:.9;
+      pointer-events:none;
+      z-index:-1;
+      animation:blobDrift 12s ease-in-out infinite alternate;
+    }
+    @keyframes blobDrift{
+      0%{transform:translate3d(-6%, -4%, 0) scale(1);}
+      50%{transform:translate3d(6%, 8%, 0) scale(1.04);}
+      100%{transform:translate3d(-4%, 6%, 0) scale(1.02);}
+    }
+    header{position:sticky; top:0; z-index:50; backdrop-filter:blur(10px); background:rgba(11,16,32,.75); border-bottom:1px solid var(--line);}
+    .wrap{max-width:1200px; margin:0 auto; padding:12px;}
+    .topbar{display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+    .titleBlock{display:flex; flex-direction:column; gap:2px; align-items:flex-start; flex:1;}
+    .title{display:flex; gap:10px; align-items:center; min-width:220px;}
+    h1{margin:0; font-size:34px; letter-spacing:.4px; line-height:1.1; font-weight:800;}
+    .sub{margin:2px 0 0; color:var(--muted); font-size:12px}
+    .controls{flex:1; display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap;}
+    .sep{
+      width:1px;
+      height:28px;
+      background:rgba(255,255,255,.12);
+      margin:0 4px;
+    }
+    .fieldLabel{font-size:12px; color:var(--muted); margin-right:-4px;}
+    .input, .select, .btn{
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      border-radius:14px; padding:10px 12px; outline:none;
+    }
+    .input{min-width:200px}
+
+    /* Fix the “white on white” select/options problem */
+    .select{
+      min-width:150px;
+      background: rgba(0,0,0,.25);
+      color: var(--text);
+    }
+    #roomHistory{min-width:140px;}
+    select option{
+      background: #0b1020;
+      color: #e9ecf5;
+    }
+
+    .btn{cursor:pointer; transition:transform .05s ease, background .2s ease, border-color .2s ease; user-select:none; display:inline-flex; align-items:center; gap:8px;}
+    .btn:hover{background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.18);}
+    .btn:active{transform:translateY(1px);}
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      box-shadow:none;
+      transform:none;
+    }
+    .btn.primary{background:rgba(124,92,255,.18); border-color:rgba(124,92,255,.35);}
+    .btn.primary:hover{background:rgba(124,92,255,.24); border-color:rgba(124,92,255,.55);}
+    .btn.good{background:rgba(34,197,94,.16); border-color:rgba(34,197,94,.35);}
+    .btn.good:hover{background:rgba(34,197,94,.22); border-color:rgba(34,197,94,.55);}
+    .btn.danger{background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.28);}
+    .btn.danger:hover{background:rgba(239,68,68,.18); border-color:rgba(239,68,68,.42);}
+    .chip{font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.15); color:rgba(255,255,255,.9); display:inline-flex; gap:8px; align-items:center;}
+    .chip.ok{border-color:rgba(34,197,94,.45); background:rgba(34,197,94,.12);}
+    .chip.bad{border-color:rgba(239,68,68,.45); background:rgba(239,68,68,.10);}
+    main .wrap{padding-top:18px; padding-bottom:40px;}
+    .grid{display:grid; grid-template-columns:1.25fr .85fr; gap:16px; align-items:start;}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}.input{min-width:100%}.title{min-width:unset}}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;}
+    .cardhead{padding:14px; display:flex; gap:10px; align-items:flex-end; justify-content:space-between; border-bottom:1px solid var(--line); background:rgba(0,0,0,.12);}
+    .cardhead h2{margin:0; font-size:24px; letter-spacing:.4px;}
+    .hint{color:var(--muted); font-size:12px}
+    .menu{padding:10px; display:flex; flex-direction:column; gap:10px;}
+    .legend{
+      padding:10px 10px 6px;
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap:8px;
+    }
+    .legendActions{
+      padding:0 10px 8px;
+      display:flex;
+      justify-content:flex-end;
+    }
+    .legendActions .btn{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+    }
+    .legendItem{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      padding:6px 10px;
+      background:rgba(0,0,0,.08);
+    }
+    .legendItem.btnLegend{
+      cursor:pointer;
+      transition:transform .05s ease, background .2s ease, border-color .2s ease, color .2s ease;
+    }
+    .legendItem.btnLegend:hover{
+      background:rgba(255,255,255,.06);
+      border-color:rgba(255,255,255,.16);
+      color:var(--text);
+    }
+    .legendItem.btnLegend.active{
+      border-color: rgba(239,68,68,.55);
+      background: rgba(239,68,68,.12);
+      color: var(--text);
+    }
+    .legendNum{
+      width:22px;
+      height:22px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      font-variant-numeric:tabular-nums;
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.10);
+      flex:0 0 22px;
+    }
+    details{border:1px solid rgba(255,255,255,.10); background:rgba(0,0,0,.10); border-radius:16px; overflow:hidden;}
+    summary{list-style:none; cursor:pointer; padding:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; user-select:none;}
+    summary::-webkit-details-marker{display:none}
+    .cat{display:flex; gap:10px; align-items:center; font-weight:650; flex-wrap:wrap;}
+    .pill{font-size:11px; color:rgba(255,255,255,.9); border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); padding:3px 8px; border-radius:999px;}
+    .items{padding:0 10px 10px; display:grid; grid-template-columns:1fr; gap:8px;}
+    .menu.dimmed{
+      opacity:.45;
+      filter:saturate(.7);
+    }
+    .menu.dimmed .item{
+      pointer-events:none;
+    }
+
+    .item{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      padding:10px;
+      background:rgba(255,255,255,.03);
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+      transition: box-shadow .18s ease, border-color .18s ease, background .18s ease, transform .12s ease;
+    }
+
+    /* NEW: highlight when active person has qty > 0 */
+    .item.selected{
+      border-color: rgba(245,158,11,.55);
+      background: linear-gradient(180deg, rgba(245,158,11,.10), rgba(255,255,255,.03));
+      box-shadow:
+        0 0 0 1px rgba(245,158,11,.25),
+        0 0 24px rgba(245,158,11,.18);
+    }
+
+    .iname{font-weight:650; line-height:1.25}
+    .idesc{margin-top:4px; font-size:12px; color:var(--muted); line-height:1.35}
+    .meta{display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap;}
+    .price{font-variant-numeric:tabular-nums; font-weight:700; padding:6px 10px; border-radius:999px; border:1px solid rgba(124,92,255,.35); background:rgba(124,92,255,.12);}
+    .qty{display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:4px; background:rgba(0,0,0,.10);}
+    .qty button{width:30px; height:30px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:var(--text); cursor:pointer;}
+    .qty button:hover{background:rgba(255,255,255,.08)}
+    .qty span{min-width:18px; text-align:center; font-variant-numeric:tabular-nums; font-weight:700;}
+
+    /* also make the qty badge pop when selected */
+    .item.selected .qty{
+      border-color: rgba(245,158,11,.45);
+      box-shadow: 0 0 0 1px rgba(245,158,11,.18) inset;
+    }
+    .item.selected .price{
+      border-color: rgba(245,158,11,.55);
+      background: rgba(245,158,11,.10);
+    }
+
+    .people{padding:10px; display:flex; flex-direction:column; gap:10px;}
+    .personTabs{display:flex; gap:8px; flex-wrap:wrap;}
+    .peopleBar{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .peopleBar .tab{
+      color: var(--text);
+    }
+    .tab{cursor:pointer; border-radius:999px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); padding:8px 10px; font-size:13px; display:flex; gap:8px; align-items:center;}
+    .tab.active{border-color:rgba(34,197,94,.45); background:rgba(34,197,94,.12);}
+    .tab .dot{width:9px; height:9px; border-radius:999px; background:rgba(255,255,255,.45);}
+    .tab.active .dot{background:rgba(34,197,94,1)}
+    .cart{border:1px solid rgba(255,255,255,.10); background:rgba(0,0,0,.10); border-radius:16px; padding:10px; display:flex; flex-direction:column; gap:8px;}
+    .cartItem{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03); border-radius:14px; padding:10px;}
+    .cartItem .line1{font-weight:650; line-height:1.25}
+    .cartItem .line2{font-size:12px; color:var(--muted); margin-top:4px}
+    .totals{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    .kpi{border:1px solid rgba(255,255,255,.10); background:rgba(0,0,0,.10); border-radius:16px; padding:10px;}
+    .kpi .label{color:var(--muted); font-size:12px}
+    .kpi .value{margin-top:4px; font-weight:800; font-size:18px; font-variant-numeric:tabular-nums;}
+
+    /* Modal */
+    .overlay{
+      position:fixed; inset:0; z-index:200;
+      background: rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center;
+      padding: 18px;
+    }
+    .overlay.show{display:flex;}
+    .modal{
+      width:min(1000px, 96vw);
+      max-height: min(80vh, 780px);
+      overflow:auto;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(16,26,52,.95), rgba(11,16,32,.95));
+      box-shadow: var(--shadow);
+    }
+    .modalHead{
+      position:sticky; top:0;
+      padding: 14px;
+      display:flex; justify-content:space-between; align-items:flex-end; gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+    }
+    .modalHead h3{margin:0; font-size:14px;}
+    .modalBody{padding: 14px; display:flex; flex-direction:column; gap:12px;}
+    .allSummaryGrand{
+      display:inline-block;
+      margin-left:6px;
+      font-size:20px;
+      font-weight:800;
+      color:var(--text);
+    }
+    .personBlock{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.10);
+      border-radius: 16px;
+      overflow:hidden;
+    }
+    .personBlockHead{
+      padding:12px;
+      display:flex; justify-content:space-between; gap:10px; align-items:center;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      user-select:none;
+    }
+    .personBlockHead .headLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .personBlockHead .chev{
+      width:18px;
+      height:18px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.2);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .personBlock.collapsed .personLines{
+      display:none;
+    }
+    .personName{font-weight:800;}
+    .mini{color:var(--muted); font-size:12px}
+    .personLines{padding: 10px; display:flex; flex-direction:column; gap:8px;}
+    .lineRow{
+      display:grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap:10px;
+      align-items:center;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding:10px;
+    }
+    @media (max-width:720px){
+      .lineRow{grid-template-columns: 1fr auto; grid-auto-rows:auto;}
+      .lineRow .colHideOnSmall{display:none;}
+    }
+    .lineTitle{font-weight:650; line-height:1.2}
+    .lineSub{margin-top:3px; font-size:12px; color:var(--muted)}
+    .lineTotal{opacity:.7;}
+    .mono{font-variant-numeric: tabular-nums; font-weight:700;}
+    .rightMono{text-align:right;}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="titleBlock">
+        <div class="title">
+          <div>
+          <h1>Crown City Menu Picker</h1>
+          </div>
+        </div>
+        <div class="peopleBar">
+          <button class="btn primary" id="addPersonBtn">＋ Add person</button>
+          <button class="btn primary tabBtn" id="showAllBtn">Show ALL selected food.</button>
+          <div class="personTabs" id="personTabs"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <span id="connStatus" class="chip bad">Disconnected</span>
+        <span class="sep" aria-hidden="true"></span>
+        <label class="fieldLabel" for="room">Room</label>
+        <input id="room" class="input" style="min-width:140px" placeholder="room" value="default" />
+        <select id="roomHistory" class="select" title="Recent rooms"></select>
+        <span class="sep" aria-hidden="true"></span>
+        <input id="search" class="input" type="search" placeholder="Search dishes (name / description / number)…" />
+        <button class="btn danger" id="deleteRoomBtn" title="Delete this room for everyone">Delete room</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <div class="cardhead">
+          <div>
+            <h2>Menu</h2>
+            <div class="hint">Add/Pick a person, add items.</div>
+          </div>
+          <div class="hint" id="menuCount"></div>
+        </div>
+        <div class="menu" id="menu"></div>
+      </section>
+
+      <aside class="card">
+        <div class="cardhead">
+          <div>
+            <h2 id="peopleTitle">Choices</h2>
+          </div>
+        </div>
+
+        <div class="people">
+          <div class="cart" id="cart"></div>
+
+          <div class="totals">
+            <div class="kpi">
+              <div class="label">Active person total</div>
+              <div class="value" id="personTotal">£0.00</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Grand total</div>
+              <div class="value" id="grandTotal">£0.00</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;">
+            <button class="btn danger" id="removePersonBtn">Remove</button>
+            <button class="btn good" id="clearCartBtn">Clear</button>
+          </div>
+
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<!-- Modal: All selections -->
+<div class="overlay" id="allOverlay" role="dialog" aria-modal="true" aria-label="All selections">
+  <div class="modal">
+    <div class="modalHead">
+      <div>
+        <h3>All selections</h3>
+        <div class="mini" id="allSummary">–</div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="btn" id="expandAllBtn">Expand all</button>
+        <button class="btn" id="collapseAllBtn">Collapse all</button>
+        <button class="btn" id="copySummaryBtn" title="Copy text summary to clipboard">Copy summary</button>
+        <button class="btn danger" id="closeAllBtn">Close</button>
+      </div>
+    </div>
+    <div class="modalBody" id="allBody"></div>
+  </div>
+</div>
+
+<script>
+/* ===================== FULL MENU (literal JS data) ===================== */
+const MENU = [
+  {"category":"APPETISERS","items":[
+    {"id":"1","name":"Hot Mix Special（For 2）","price":15.6,"desc":"Crispy Seaweed, Satay Chicken on Skewers, Crispy Won Ton, Sesame Prawns on Toast & Dry Barbequed Spare Ribs"},
+    {"id":"2","name":"House Hors D'oeuvres (For  2)","price":16.6,"desc":"Crispy Seaweed, Butterfly Prawns, Peking Spare Ribs,Smoked Spicy Shredded Chicken & Vegetarian Spring Rolls"},
+    {"id":"3","name":"Spicy Mixed Starters (For 2) ①⑩","price":16.9,"desc":"Smoked Spicy Shredded Chicken, Smoked Spicy Shredded Beef, Thai-style Spare Ribs, Thai-style Chicken Wings & Vegetarian Spring Rolls"},
+    {"id":"4","name":"Crispy Seaweed","price":5.7,"desc":""},
+    {"id":"5","name":"Thai-style Chicken Wings ⑩","price":7.7,"desc":""},
+    {"id":"6","name":"Thai-style Spare Ribs ①⑩","price":7.9,"desc":""},
+    {"id":"7","name":"Fried King Prawns in Peppercorn Salt ①","price":8.7,"desc":""},
+    {"id":"8","name":"Sesame Prawns on Toast ①⑤","price":7.7,"desc":""},
+    {"id":"9","name":"Satay King Prawns on Skewers ①⑭","price":8.0,"desc":""},
+    {"id":"10","name":"Fried Squid In Peppercorn Salt ①⑧⑩","price":8.0,"desc":""},
+    {"id":"11","name":"Butterfly Prawns ①⑤","price":7.9,"desc":""},
+    {"id":"12","name":"Smoked Spicy Shredded Chicken ①⑩","price":7.7,"desc":""},
+    {"id":"13","name":"Smoked Spicy Shredded Beef ①⑩","price":8.3,"desc":""},
+    {"id":"14","name":"Spicy Roasted Crispy Lamb ①","price":9.9,"desc":""},
+    {"id":"15","name":"Spicy Roast Crispy Pork ①","price":8.0,"desc":""},
+    {"id":"16","name":"Smoked Spicy Shredded Lamb ①⑩","price":9.9,"desc":""},
+    {"id":"17","name":"Peking Spare Ribs","price":7.6,"desc":""},
+    {"id":"18","name":"Dry Barbequed Spare Ribs ①","price":7.6,"desc":""},
+    {"id":"19","name":"Spare Ribs with Szechuan Sauce ①⑩","price":7.6,"desc":""},
+    {"id":"20","name":"Spare Ribs with Hot & Sour Sauce ①⑩","price":7.6,"desc":""},
+    {"id":"21","name":"Crispy Aromatic Duck (Served With Pancakes) ②⑨","price":16.9,"desc":""},
+    {"id":"22","name":"Vegetarian Spring Rolls ⑩","price":5.5,"desc":""},
+    {"id":"23","name":"Mini Vegetarian Spring Rolls (10) ⑩","price":5.5,"desc":""},
+    {"id":"24","name":"Chicken Spring Rolls ⑩","price":6.4,"desc":""},
+    {"id":"25","name":"Won Ton ⑩","price":6.4,"desc":""},
+    {"id":"26","name":"Crispy Vegetable Won Ton ⑩","price":5.5,"desc":""},
+    {"id":"27","name":"Fried Chicken Wings in Peppercorn Salt ①","price":7.7,"desc":""},
+    {"id":"28","name":"Fried Chicken Wings in Barbeque Sauce ①","price":7.7,"desc":""},
+    {"id":"29","name":"Fried Chicken Wings in Hot & Sour Sauce ①⑩","price":7.7,"desc":""},
+    {"id":"30","name":"Prawn Crackers ①","price":3.2,"desc":""}
+  ]},
+  {"category":"SPECIAL ELABORATE STARTERS","items":[
+    {"id":"31","name":"Baked Lobster  ①⑨","price":65.0,"desc":"with cheese, shallots and ginger and chilli sauce"},
+    {"id":"32","name":"King Prawns ①②","price":15.9,"desc":"with Salt & Peppercorn"},
+    {"id":"33","name":"King Prawns ①②","price":15.9,"desc":"with Chilli Sauce"},
+    {"id":"34","name":"King Prawns ①②","price":15.9,"desc":"with Thai-style Sauce"},
+    {"id":"35","name":"Peking Duck (Minimum for 4)","price":68.0,"desc":"Served with Pancake,Cucumber,Spring onion & Hoi-Sin Sauce"},
+    {"id":"35a","name":"Extra Pancake Portion","price":2.0,"desc":""}
+  ]},
+  {"category":"SOUPS","items":[
+    {"id":"36","name":"Tom Yum Seafood Soup ( Thai-style) ⑨","price":5.2,"desc":""},
+    {"id":"37","name":"Hot & Sour Soup ⑨","price":4.7,"desc":""},
+    {"id":"38","name":"Sweetcorn Soup ⑨","price":4.7,"desc":""},
+    {"id":"39","name":"Crabmeat & Sweetcorn Soup ⑨","price":4.7,"desc":""},
+    {"id":"40","name":"Won Ton Soup ⑨⑩","price":4.7,"desc":""},
+    {"id":"41","name":"Chicken & Sweetcorn Soup ⑨","price":4.7,"desc":""},
+    {"id":"42","name":"Chicken Muchroom Soup ⑨","price":4.7,"desc":""},
+    {"id":"43","name":"Chicken Noodle Soup ⑨","price":4.7,"desc":""}
+  ]},
+  {"category":"SEAFOOD DISHES","items":[
+    {"id":"44","name":"Mixed Seafood Platter ①②⑨","price":12.9,"desc":""},
+    {"id":"45","name":"Thai-style King Prawns ①②⑩","price":9.9,"desc":""},
+    {"id":"46","name":"King Prawns in Garlic & Chilli Sauce ①②⑩","price":9.9,"desc":""},
+    {"id":"47","name":"Szechuan King Prawns ①②⑩","price":9.9,"desc":""},
+    {"id":"48","name":"King Prawns with Cashewnuts and Yellow Bean Sauce ②③⑩","price":9.9,"desc":""},
+    {"id":"49","name":"King Prawns with Ginger and Spring Onions ②⑨","price":9.9,"desc":""},
+    {"id":"50","name":"King Prawns with Green Pepper in Black Bean Sauce ②⑨⑩","price":9.9,"desc":""},
+    {"id":"51","name":"King Prawns with Oyster Sauce ②⑨⑩","price":9.9,"desc":""},
+    {"id":"52","name":"King Prawns with Lemon Sauce ①②","price":9.9,"desc":""},
+    {"id":"53","name":"Sweet & Sour King Prawns ②","price":9.9,"desc":""},
+    {"id":"54","name":"Curry King Prawns ①②⑩","price":9.9,"desc":""},
+    {"id":"55","name":"Thai-style King Prawns ②⑩","price":9.9,"desc":""},
+    {"id":"56","name":"Fried Scallops with Garlic & Chilli Sauce ②⑨⑩","price":9.5,"desc":""},
+    {"id":"57","name":"Fried Scallops with Ginger and Spring Onions ②⑨","price":9.5,"desc":""},
+    {"id":"58","name":"Fried Scallops with Szechuan Sauce ②⑨⑩","price":9.5,"desc":""},
+    {"id":"59","name":"Fried Mussels with Special Chilli Sauce ②⑨","price":9.5,"desc":""}
+  ]},
+  {"category":"MEAT DISHES","items":[
+    {"id":"60","name":"Mandarin Fillet Steak ⑪","price":13.6,"desc":""},
+    {"id":"61","name":"Fillet Steak with Green Pepper in Black Bean Sauce ⑪⑩","price":13.6,"desc":""},
+    {"id":"62","name":"Fillet Steak with Ginger and Spring Onions ⑪⑨","price":13.6,"desc":""},
+    {"id":"63","name":"Fillet Steak in Oyster Sauce ⑪⑨⑩","price":13.6,"desc":""},
+    {"id":"64","name":"Szechuan Fillet Steak ⑪⑩","price":13.6,"desc":""},
+    {"id":"65","name":"Fillet Steak with Garlic and Chilli Sauce ⑪⑩","price":13.6,"desc":""},
+    {"id":"66","name":"Fillet Steak Cantonese Style ⑪⑩","price":13.6,"desc":""},
+    {"id":"67","name":"Satay Beef ⑪⑭","price":8.0,"desc":""},
+    {"id":"68","name":"Beef with Green Pepper in Black Bean Sauce ⑪⑨⑩","price":8.0,"desc":""},
+    {"id":"69","name":"Beef with Ginger and Spring Onions ⑪⑨","price":8.0,"desc":""},
+    {"id":"70","name":"Beef with Oyster Sauce ⑪⑨⑩","price":8.0,"desc":""},
+    {"id":"71","name":"Szechuan Beef ⑪⑩","price":8.0,"desc":""},
+    {"id":"72","name":"Beef with Garlic & Chilli Sauce ⑪⑩","price":8.0,"desc":""},
+    {"id":"73","name":"Sweet & Sour Pork (Hong kong style) ⑧","price":8.0,"desc":""},
+    {"id":"74","name":"Cantonese Roast Pork ⑨⑩","price":8.0,"desc":""}
+  ]},
+  {"category":"DUCK DISHES","items":[
+    {"id":"75","name":"Duck with Plum Sauce","price":8.7,"desc":""},
+    {"id":"76","name":"Duck with Pineapple","price":8.7,"desc":""},
+    {"id":"77","name":"Duck with Ginger and Spring Onions ⑨","price":8.7,"desc":""},
+    {"id":"78","name":"Duck with Green Pepper in Black Bean Sauce ⑨⑩","price":8.7,"desc":""},
+    {"id":"79","name":"Cantonese Roast Duck ⑨⑩","price":8.7,"desc":""}
+  ]},
+  {"category":"POULTRY DISHES","items":[
+    {"id":"80","name":"Chicken Chinese Style ⑨⑩","price":7.7,"desc":""},
+    {"id":"81","name":"Thai-style Chicken ⑩","price":7.7,"desc":""},
+    {"id":"82","name":"Chicken with Ginger and Spring Onions ⑨","price":7.7,"desc":""},
+    {"id":"83","name":"Chicken with Green Pepper in Black Bean Sauce ⑨⑩","price":7.7,"desc":""},
+    {"id":"84","name":"Chicken with Oyster Sauce ⑨⑩","price":7.7,"desc":""},
+    {"id":"85","name":"Sweet & Sour Chicken Hong Kong Style ⑧","price":7.7,"desc":""},
+    {"id":"86","name":"Szechuan Chicken ⑩","price":7.7,"desc":""},
+    {"id":"87","name":"Chicken with Garlic and Chilli Sauce ⑩","price":7.7,"desc":""},
+    {"id":"88","name":"Chicken with Lemon Sauce ①","price":7.7,"desc":""},
+    {"id":"89","name":"Chicken with Tomato Sauce ⑧","price":7.7,"desc":""},
+    {"id":"90","name":"Chicken with Pineapple ⑧","price":7.7,"desc":""},
+    {"id":"91","name":"Chicken with Mushroom ⑨","price":7.7,"desc":""},
+    {"id":"92","name":"Chicken with Bamboo Shoots and Water Chestnuts ⑨","price":7.7,"desc":""},
+    {"id":"93","name":"Chicken with Mixed Vegetables ⑨","price":7.7,"desc":""},
+    {"id":"94","name":"Chicken with Cashewnuts and Yellow Bean Sauce ③⑩","price":7.7,"desc":""}
+  ]},
+  {"category":"CURRY","items":[
+    {"id":"97","name":"Special Curry ①⑩","price":8.7,"desc":""},
+    {"id":"98","name":"Shrimp Curry ①⑩","price":8.7,"desc":""},
+    {"id":"99","name":"Chicken Curry ①⑩","price":7.7,"desc":""},
+    {"id":"100","name":"Beef Curry ①⑩","price":8.0,"desc":""},
+    {"id":"101","name":"Roast Pork Curry ①⑩","price":8.0,"desc":""},
+    {"id":"102","name":"King Prawns with Red Thai Curry ①④⑩","price":9.9,"desc":""},
+    {"id":"103","name":"King Prawns with Green Thai Curry ①④⑩","price":9.9,"desc":""},
+    {"id":"104","name":"Chicken with Green Thai Curry ①④⑩","price":9.6,"desc":""},
+    {"id":"105","name":"Chicken with Red Thai Curry ④⑩","price":9.6,"desc":""}
+  ]},
+  {"category":"BEANCURD & VEGETABLES","items":[
+    {"id":"107","name":"Braised Beancurd Family Style ⑨","price":7.2,"desc":""},
+    {"id":"108","name":"Fried Beancurd with Garlic and Chilli Sauce ⑩","price":7.2,"desc":""},
+    {"id":"109","name":"Fried Beancurd with Szechuan Sauce ⑩","price":7.2,"desc":""},
+    {"id":"110","name":"Fried Beancurd with Mixed Vegetables ⑨","price":7.2,"desc":""},
+    {"id":"111","name":"Mixed Vegetables Family Style ⑨","price":6.7,"desc":""},
+    {"id":"112","name":"Stir Fried Mange Tout","price":6.7,"desc":""},
+    {"id":"113","name":"Stir Fried Mixed Vegetables with Oyster Sauce ⑨⑩","price":6.7,"desc":""},
+    {"id":"114","name":"Stir Fried Mixed Vegetables with Garlic & Chilli Sauce ⑩","price":6.7,"desc":""},
+    {"id":"115","name":"Stir Fried Mixed Vegetables with Black Bean Sauce ⑨⑩","price":6.7,"desc":""},
+    {"id":"116","name":"Stir Fried Mixed Vegetables with Szechuan Sauce ⑩","price":6.7,"desc":""},
+    {"id":"117","name":"Stir Fried Mixed Vegetables with Curry Sauce ①⑩","price":6.7,"desc":""},
+    {"id":"118","name":"Stir Fried Mixed Vegetables with Sweet & Sour Sauce ⑧","price":6.7,"desc":""},
+    {"id":"121","name":"Fried Mixed Vegetables with Satay Sauce ⑨⑩⑭","price":6.7,"desc":""}
+  ]},
+  {"category":"RICE DISHES","items":[
+    {"id":"122","name":"Lotus Leaf Wrapped Fried Rice ①⑧","price":11.8,"desc":""},
+    {"id":"123","name":"Fried Rice (Beef /Chicken / Roast Pork) ⑧","price":5.9,"desc":""},
+    {"id":"124","name":"Shrimp Fried Rice ⑧","price":5.9,"desc":""},
+    {"id":"125","name":"Special Fried Rice ⑧","price":6.2,"desc":""},
+    {"id":"126","name":"Chicken & Roast Pork Fried Rice ⑧","price":6.2,"desc":""},
+    {"id":"127","name":"Thai-style Fried Rice ⑧⑩","price":6.2,"desc":""},
+    {"id":"128","name":"Vegetarian Fried Rice ⑧","price":5.9,"desc":""},
+    {"id":"129","name":"Mushroom Fried Rice ⑧","price":5.9,"desc":""},
+    {"id":"130","name":"Pineapple Fried Rice ⑧","price":5.9,"desc":""},
+    {"id":"131","name":"Tomato Fried Rice ⑧","price":5.9,"desc":""},
+    {"id":"132","name":"Egg Fried Rice ⑧","price":4.9,"desc":""},
+    {"id":"133","name":"Boiled Rice","price":4.6,"desc":""}
+  ]},
+  {"category":"NOODLE DISHES","items":[
+    {"id":"134","name":"Stir Fried Noodles with (Beef/Chicken/Roast Pork) ⑩","price":6.2,"desc":""},
+    {"id":"135","name":"Shrimp Noodles ⑩","price":6.2,"desc":""},
+    {"id":"136","name":"Special Noodles ⑩","price":6.7,"desc":""},
+    {"id":"137","name":"Vegetarian Noodles ⑩","price":6.2,"desc":""},
+    {"id":"138","name":"Singapore Vermicelli ①⑩","price":6.7,"desc":""}
+  ]},
+  {"category":"SPECIAL SET MEALS","items":[
+    {"id":"A","name":"Set Meal A / Per Person (Minimum for 2 persons)","price":25.8,"desc":"Crispy Seaweed, Sesame Prawns on Toast, Satay Chicken... Sweet & Sour Chicken, Beef with Black Pepper Sauce, Fried Mixed Vegetables, Egg Fried Rice"},
+    {"id":"B","name":"Set Meal B / Per Person (Minimum for 2 persons)","price":27.8,"desc":"Crispy Seaweed, Butterfly Prawns, Smoked Spicy Shred... Beef with Ginger & Spring Onion, Stir Fried Chicken with Mange Tout, Special Fried Rice"},
+    {"id":"C","name":"Set Meal C / Per Person (Minimum for 2 persons)","price":23.0,"desc":"Vegetarian Spring Rolls, Sweetcorn Soup, Sweet & Sour Vegetables, Mixed Vegetables in Satay Sauce, Egg Fried Rice"}
+  ]}
+];
+
+/* ===================== Realtime logic ===================== */
+let ws = null;
+let serverVersion = 0;
+let state = { people: [], activePersonId: null, ui: { search: "" } };
+let openCats = new Set();
+let localAllergens = new Set();
+let roomHistory = [];
+
+function loadLocalAllergens(){
+  try{
+    const raw = localStorage.getItem("menuPickerAllergens");
+    if(!raw) return;
+    const arr = JSON.parse(raw);
+    if(Array.isArray(arr)) localAllergens = new Set(arr.map(n => Number(n)).filter(Boolean));
+  }catch{
+    localAllergens = new Set();
+  }
+}
+
+function saveLocalAllergens(){
+  const arr = Array.from(localAllergens).sort((a,b) => a - b);
+  localStorage.setItem("menuPickerAllergens", JSON.stringify(arr));
+}
+
+function loadRoomHistory(){
+  try{
+    const raw = localStorage.getItem("menuPickerRooms");
+    const arr = raw ? JSON.parse(raw) : [];
+    if(Array.isArray(arr)) roomHistory = arr.filter(Boolean);
+  }catch{
+    roomHistory = [];
+  }
+}
+
+function saveRoomHistory(){
+  localStorage.setItem("menuPickerRooms", JSON.stringify(roomHistory));
+}
+
+function updateRoomHistoryUI(){
+  const sel = $("roomHistory");
+  if(!sel) return;
+  sel.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Recent rooms";
+  sel.appendChild(placeholder);
+  roomHistory.forEach(r => {
+    const opt = document.createElement("option");
+    opt.value = r;
+    opt.textContent = r;
+    sel.appendChild(opt);
+  });
+  sel.value = "";
+}
+
+function addRoomToHistory(room){
+  const clean = String(room || "").trim();
+  if(!clean) return;
+  roomHistory = [clean, ...roomHistory.filter(r => r !== clean)].slice(0, 10);
+  saveRoomHistory();
+  updateRoomHistoryUI();
+}
+
+function removeRoomFromHistory(room){
+  const clean = String(room || "").trim();
+  if(!clean) return;
+  roomHistory = roomHistory.filter(r => r !== clean);
+  saveRoomHistory();
+  updateRoomHistoryUI();
+}
+const ALLERGENS = [
+  { code: 1, label: "Crustaceans", char: "①" },
+  { code: 2, label: "Molluscs", char: "②" },
+  { code: 3, label: "Nuts", char: "③" },
+  { code: 4, label: "Milk", char: "④" },
+  { code: 5, label: "Sesame seed", char: "⑤" },
+  { code: 6, label: "Fish", char: "⑥" },
+  { code: 7, label: "Mustard", char: "⑦" },
+  { code: 8, label: "Egg", char: "⑧" },
+  { code: 9, label: "Soya", char: "⑨" },
+  { code: 10, label: "Cereal containing gluten", char: "⑩" },
+  { code: 11, label: "Celery", char: "⑪" },
+  { code: 12, label: "Sulphur dioxide", char: "⑫" },
+  { code: 13, label: "Lupin", char: "⑬" },
+  { code: 14, label: "Peanuts", char: "⑭" },
+];
+const ALLERGEN_CHAR_TO_CODE = Object.fromEntries(ALLERGENS.map(a => [a.char, a.code]));
+
+const $ = (id) => document.getElementById(id);
+const money = (n) => "£" + (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+
+function setConn(ok, text){
+  const chip = $("connStatus");
+  chip.classList.toggle("ok", ok);
+  chip.classList.toggle("bad", !ok);
+  chip.textContent = text;
+}
+
+function uid(){
+  if (crypto?.randomUUID) return crypto.randomUUID();
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
+function itemKey(cat, id){ return `${cat}|${id}`; }
+
+function findMenuItemByKey(key){
+  const parts = key.split("|");
+  const cat = parts[0], id = parts[1];
+  const c = MENU.find(x => x.category === cat);
+  if(!c) return null;
+  return c.items.find(i => String(i.id) === String(id)) || null;
+}
+
+function getActivePerson(){
+  return state.people.find(p => p.id === state.activePersonId) || null;
+}
+
+function setCartQty(person, key, qty){
+  if(qty <= 0) delete person.cart[key];
+  else person.cart[key] = qty;
+}
+
+function personTotal(person){
+  let t = 0;
+  for(const key in (person.cart || {})){
+    const qty = person.cart[key];
+    const it = findMenuItemByKey(key);
+    if(it) t += it.price * qty;
+  }
+  return t;
+}
+
+function grandTotal(){
+  return state.people.reduce((sum, p) => sum + personTotal(p), 0);
+}
+
+function menuItemMatchesSearch(item, q){
+  if(!q) return true;
+  const hay = `${item.id} ${item.name} ${(item.desc||"")}`.toLowerCase();
+  return hay.includes(q);
+}
+
+function itemAllergens(item){
+  const name = String(item.name || "");
+  const matches = name.match(/[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭]/g) || [];
+  return matches.map(ch => ALLERGEN_CHAR_TO_CODE[ch]).filter(Boolean);
+}
+
+function itemBlockedByAllergens(item, blocked){
+  if(!blocked || blocked.size === 0) return false;
+  const codes = itemAllergens(item);
+  return codes.some(c => blocked.has(c));
+}
+
+function sendPatch(){
+  if(!ws || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify({
+    type: "patch",
+    baseVersion: serverVersion,
+    patch: { op: "set_state", state }
+  }));
+}
+
+function connect(){
+  const room = ($("room").value.trim() || "default");
+  const wsUrl = `ws://${location.host}/ws`;
+
+  if(ws) try { ws.close(); } catch {}
+  setConn(false, "Connecting…");
+  addRoomToHistory(room);
+
+  ws = new WebSocket(wsUrl);
+  ws.onopen = () => ws.send(JSON.stringify({ type:"join", room }));
+
+  ws.onmessage = (ev) => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch { return; }
+    if(msg.type === "error"){
+      setConn(false, "Error");
+      if(msg.error) alert(msg.error);
+      return;
+    }
+    if(msg.type === "room_deleted"){
+      const room = msg.room || $("room").value.trim() || "default";
+      setConn(false, "Room deleted");
+      removeRoomFromHistory(room);
+      state = { people: [], activePersonId: null, ui: { search: "" } };
+      render();
+      $("room").value = "default";
+      connect();
+      return;
+    }
+    if(msg.type === "full_state"){
+      serverVersion = msg.version || 0;
+      state = msg.state;
+      setConn(true, `In Room : ${msg.room}`);
+      render();
+    }
+  };
+
+  ws.onclose = () => setConn(false, "Disconnected");
+  ws.onerror = () => setConn(false, "Disconnected");
+}
+
+function escapeHtml(s){
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+
+function render(){
+  renderPeopleControls();
+  renderMenu();
+  renderCart();
+  renderTotals();
+}
+
+function renderPeopleControls(){
+  const people = state.people || [];
+  if(people.length === 0){
+    state.activePersonId = null;
+  } else {
+    if(!people.some(p => p.id === state.activePersonId)){
+      state.activePersonId = people[0].id;
+    }
+  }
+
+  const tabs = $("personTabs");
+  tabs.innerHTML = "";
+  people.forEach(p => {
+    const b = document.createElement("button");
+    b.className = "tab" + (p.id === state.activePersonId ? " active" : "");
+    b.type = "button";
+    b.innerHTML = `<span class="dot"></span><span>${escapeHtml(p.name)}</span>`;
+    b.onclick = () => { state.activePersonId = p.id; sendPatch(); };
+    tabs.appendChild(b);
+  });
+  const showAllBtn = $("showAllBtn");
+  if(showAllBtn){
+    const hasActive = !!getActivePerson();
+    showAllBtn.disabled = !hasActive;
+  }
+
+  const removeBtn = $("removePersonBtn");
+  if(removeBtn){
+    const active = getActivePerson();
+    removeBtn.textContent = active ? `Remove ${active.name}` : "Remove";
+    removeBtn.disabled = !active;
+  }
+
+  const clearBtn = $("clearCartBtn");
+  if(clearBtn){
+    const active = getActivePerson();
+    clearBtn.textContent = active ? `Clear ${active.name}'s choices` : "Clear choices";
+    clearBtn.disabled = !active;
+  }
+
+  const peopleTitle = $("peopleTitle");
+  if(peopleTitle){
+    const active = getActivePerson();
+    peopleTitle.textContent = active ? `${active.name}'s choices` : "Choices";
+    peopleTitle.closest(".cardhead").style.display = active ? "" : "none";
+  }
+}
+
+function renderMenu(){
+  const q = ($("search").value || "").trim().toLowerCase();
+  const menuEl = $("menu");
+  menuEl.innerHTML = "";
+
+  menuEl.classList.toggle("dimmed", !getActivePerson());
+
+  let shownItems = 0, totalItems = 0;
+  const blocked = localAllergens;
+
+  const legendDetails = document.createElement("details");
+  legendDetails.open = q.length > 0 || openCats.has("allergen-key");
+  legendDetails.addEventListener("toggle", () => {
+    if(legendDetails.open) openCats.add("allergen-key");
+    else openCats.delete("allergen-key");
+  });
+  const legendSummary = document.createElement("summary");
+  legendSummary.innerHTML = `
+      <div class="cat">
+        <span>Allergen key</span>
+        <span class="pill">14 items · ${blocked.size} selected</span>
+      </div>
+      <div class="hint">Select allergen(s) to remove from list.</div>
+    `;
+  const legendActions = document.createElement("div");
+  legendActions.className = "legendActions";
+  const clearBtn = document.createElement("button");
+  clearBtn.type = "button";
+  clearBtn.className = "btn";
+  clearBtn.textContent = "Clear filters";
+  clearBtn.disabled = localAllergens.size === 0;
+  clearBtn.onclick = () => {
+    if(localAllergens.size === 0) return;
+    localAllergens.clear();
+    saveLocalAllergens();
+    render();
+  };
+  legendActions.appendChild(clearBtn);
+
+  const legendList = document.createElement("div");
+  legendList.className = "legend";
+  ALLERGENS.forEach(a => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "legendItem btnLegend" + (blocked.has(a.code) ? " active" : "");
+    btn.setAttribute("aria-pressed", blocked.has(a.code) ? "true" : "false");
+    btn.innerHTML = `<span class="legendNum">${a.code}</span>${a.label}`;
+    btn.onclick = () => {
+      if(localAllergens.has(a.code)) localAllergens.delete(a.code);
+      else localAllergens.add(a.code);
+      saveLocalAllergens();
+      render();
+    };
+    legendList.appendChild(btn);
+  });
+  legendDetails.append(legendSummary, legendActions, legendList);
+  menuEl.appendChild(legendDetails);
+
+  MENU.forEach(section => {
+    const allowed = section.items.filter(it => !itemBlockedByAllergens(it, blocked));
+    totalItems += allowed.length;
+    const items = allowed.filter(it => menuItemMatchesSearch(it, q));
+    if(items.length === 0) return;
+    shownItems += items.length;
+
+    const det = document.createElement("details");
+    det.open = q.length > 0 || openCats.has(section.category);
+    det.addEventListener("toggle", () => {
+      if(det.open) openCats.add(section.category);
+      else openCats.delete(section.category);
+    });
+
+    const sum = document.createElement("summary");
+    sum.innerHTML = `
+      <div class="cat">
+        <span>${escapeHtml(section.category)}</span>
+        <span class="pill">${items.length} item${items.length!==1?"s":""}</span>
+      </div>
+      <div class="hint">tap</div>
+    `;
+
+    const list = document.createElement("div");
+    list.className = "items";
+
+    items.forEach(it => {
+      const row = document.createElement("div");
+      row.className = "item";
+
+      const currentQty = activeQty(section.category, it.id);
+      if(currentQty > 0) row.classList.add("selected");
+
+      const left = document.createElement("div");
+      left.innerHTML = `
+        <div class="iname">${escapeHtml(it.id)}. ${escapeHtml(it.name)}</div>
+        ${it.desc ? `<div class="idesc">${escapeHtml(it.desc)}</div>` : ""}
+      `;
+
+      const right = document.createElement("div");
+      right.className = "meta";
+
+      const price = document.createElement("div");
+      price.className = "price";
+      price.textContent = money(it.price);
+
+      const qty = document.createElement("div");
+      qty.className = "qty";
+
+      const minus = document.createElement("button");
+      minus.type = "button";
+      minus.textContent = "−";
+      minus.onclick = () => adjustActive(section.category, it, -1);
+
+      const count = document.createElement("span");
+      count.textContent = String(currentQty);
+
+      const plus = document.createElement("button");
+      plus.type = "button";
+      plus.textContent = "+";
+      plus.onclick = () => adjustActive(section.category, it, +1);
+
+      qty.append(minus, count, plus);
+      right.append(price, qty);
+
+      row.append(left, right);
+      list.appendChild(row);
+    });
+
+    det.append(sum, list);
+    menuEl.appendChild(det);
+  });
+
+  $("menuCount").textContent = q ? `${shownItems} matched (of ${totalItems})` : `${totalItems} items`;
+
+  function activeQty(cat, id){
+    const p = getActivePerson();
+    if(!p) return 0;
+    const key = itemKey(cat, id);
+    return (p.cart && p.cart[key]) ? p.cart[key] : 0;
+  }
+
+  function adjustActive(cat, it, delta){
+    const p = getActivePerson();
+    if(!p) return;
+    if(!p.cart) p.cart = {};
+    const key = itemKey(cat, it.id);
+    const next = Math.max(0, (p.cart[key] || 0) + delta);
+    setCartQty(p, key, next);
+    sendPatch();
+  }
+}
+
+function renderCart(){
+  const p = getActivePerson();
+  const cartEl = $("cart");
+  cartEl.innerHTML = "";
+
+  if(!p){
+    cartEl.innerHTML = `<div class="hint">No people yet. Add someone.</div>`;
+    return;
+  }
+
+  const entries = Object.entries(p.cart || {})
+    .map(([key, qty]) => ({ key, qty, item: findMenuItemByKey(key) }))
+    .filter(x => x.item && x.qty > 0)
+    .sort((a,b) => a.item.name.localeCompare(b.item.name));
+
+  if(entries.length === 0){
+    cartEl.innerHTML = `<div class="hint">Empty cart for <b>${escapeHtml(p.name)}</b>.</div>`;
+    return;
+  }
+
+  entries.forEach(({key, qty, item}) => {
+    const row = document.createElement("div");
+    row.className = "cartItem";
+
+    const left = document.createElement("div");
+    left.innerHTML = `
+      <div class="line1">${escapeHtml(item.name)}</div>
+      <div class="line2">${escapeHtml(key.split("|")[0])} · ${money(item.price)} each</div>
+    `;
+
+    const right = document.createElement("div");
+    right.className = "meta";
+
+    const lineTotal = document.createElement("div");
+    lineTotal.className = "price";
+    lineTotal.textContent = money(item.price * qty);
+
+    const qtyEl = document.createElement("div");
+    qtyEl.className = "qty";
+
+    const minus = document.createElement("button");
+    minus.type = "button";
+    minus.textContent = "−";
+    minus.onclick = () => { setCartQty(p, key, qty - 1); sendPatch(); };
+
+    const count = document.createElement("span");
+    count.textContent = String(qty);
+
+    const plus = document.createElement("button");
+    plus.type = "button";
+    plus.textContent = "+";
+    plus.onclick = () => { setCartQty(p, key, qty + 1); sendPatch(); };
+
+    qtyEl.append(minus, count, plus);
+
+    const del = document.createElement("button");
+    del.className = "btn danger";
+    del.style.padding = "8px 10px";
+    del.textContent = "Remove";
+    del.onclick = () => { setCartQty(p, key, 0); sendPatch(); };
+
+    right.append(lineTotal, qtyEl, del);
+    row.append(left, right);
+    cartEl.appendChild(row);
+  });
+}
+
+function renderTotals(){
+  const p = getActivePerson();
+  $("personTotal").textContent = money(p ? personTotal(p) : 0);
+  $("grandTotal").textContent = money(grandTotal());
+}
+
+/* ===== All selections modal ===== */
+function buildAllSelections(){
+  const body = $("allBody");
+  body.innerHTML = "";
+
+  const people = (state.people || []).slice().sort((a,b) => a.name.localeCompare(b.name));
+  const gt = grandTotal();
+
+  let totalLines = 0;
+  let totalItems = 0;
+
+  people.forEach(p => {
+    const entries = Object.entries(p.cart || {})
+      .map(([key, qty]) => ({ key, qty, item: findMenuItemByKey(key) }))
+      .filter(x => x.item && x.qty > 0)
+      .sort((a,b) => a.item.name.localeCompare(b.item.name));
+
+    const pTotal = personTotal(p);
+    totalLines += entries.length;
+    totalItems += entries.reduce((s,x)=>s + x.qty, 0);
+
+    const block = document.createElement("div");
+    block.className = "personBlock";
+
+    const head = document.createElement("div");
+    head.className = "personBlockHead";
+    head.innerHTML = `
+      <div class="headLeft">
+        <span class="chev">▾</span>
+        <div>
+          <div class="personName">${escapeHtml(p.name)}</div>
+          <div class="mini">${entries.length ? `${entries.length} line${entries.length!==1?"s":""}` : "No selections"}</div>
+        </div>
+      </div>
+      <div class="price">${money(pTotal)}</div>
+    `;
+
+    const lines = document.createElement("div");
+    lines.className = "personLines";
+
+    if(entries.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "hint";
+      empty.textContent = "Nothing selected.";
+      lines.appendChild(empty);
+    } else {
+      entries.forEach(({key, qty, item}) => {
+        const [cat] = key.split("|");
+        const lineTotal = item.price * qty;
+
+        const row = document.createElement("div");
+        row.className = "lineRow";
+        row.innerHTML = `
+          <div>
+            <div class="lineTitle">${escapeHtml(item.name)}</div>
+            <div class="lineSub">${escapeHtml(cat)} · ${escapeHtml(item.id)} · ${money(item.price)} each</div>
+          </div>
+          <div class="mono rightMono colHideOnSmall">x${qty}</div>
+          <div class="mono rightMono colHideOnSmall">${money(item.price)}</div>
+          <div class="mono rightMono lineTotal">${money(lineTotal)}</div>
+        `;
+        lines.appendChild(row);
+      });
+    }
+
+    head.addEventListener("click", () => {
+      block.classList.toggle("collapsed");
+      const chev = head.querySelector(".chev");
+      if(chev) chev.textContent = block.classList.contains("collapsed") ? "▸" : "▾";
+    });
+
+    block.append(head, lines);
+    body.appendChild(block);
+  });
+
+  $("allSummary").innerHTML =
+    `${people.length} people · ${totalItems} item(s) · ${totalLines} line(s) · Grand total <span class="allSummaryGrand">${money(gt)}</span>`;
+}
+
+function showAll(){
+  buildAllSelections();
+  $("allOverlay").classList.add("show");
+}
+
+function setAllCollapsed(collapsed){
+  const blocks = $("allBody").querySelectorAll(".personBlock");
+  blocks.forEach(block => {
+    block.classList.toggle("collapsed", collapsed);
+    const chev = block.querySelector(".chev");
+    if(chev) chev.textContent = collapsed ? "▸" : "▾";
+  });
+}
+
+function closeAll(){
+  $("allOverlay").classList.remove("show");
+}
+
+function buildTextSummary(){
+  const people = (state.people || []).slice().sort((a,b) => a.name.localeCompare(b.name));
+  const lines = [];
+
+  people.forEach(p => {
+    const entries = Object.entries(p.cart || {})
+      .map(([key, qty]) => ({ key, qty, item: findMenuItemByKey(key) }))
+      .filter(x => x.item && x.qty > 0)
+      .sort((a,b) => a.item.name.localeCompare(b.item.name));
+
+    lines.push(`${p.name} — ${money(personTotal(p))}`);
+    if(entries.length === 0){
+      lines.push(`  (no selections)`);
+    } else {
+      entries.forEach(({key, qty, item}) => {
+        const cat = key.split("|")[0];
+        lines.push(`  - ${item.name} [${cat}] x${qty} @ ${money(item.price)} = ${money(item.price * qty)}`);
+      });
+    }
+    lines.push("");
+  });
+
+  lines.push(`GRAND TOTAL: ${money(grandTotal())}`);
+  return lines.join("\n");
+}
+
+async function copySummary(){
+  const text = buildTextSummary();
+  try{
+    await navigator.clipboard.writeText(text);
+    const btn = $("copySummaryBtn");
+    const old = btn.textContent;
+    btn.textContent = "Copied";
+    setTimeout(()=>btn.textContent = old, 900);
+  }catch{
+    alert("Clipboard failed. Your browser is being precious.");
+  }
+}
+
+/* UI hooks */
+$("search").addEventListener("input", render);
+$("roomHistory").addEventListener("change", (e) => {
+  const val = e.target.value;
+  if(!val) return;
+  $("room").value = val;
+  connect();
+});
+$("room").addEventListener("change", connect);
+$("deleteRoomBtn").addEventListener("click", () => {
+  const room = ($("room").value.trim() || "default");
+  if(!confirm(`Delete room "${room}" for everyone? This cannot be undone.`)) return;
+  if(!ws || ws.readyState !== WebSocket.OPEN){
+    alert("Not connected to the server.");
+    return;
+  }
+  ws.send(JSON.stringify({ type: "delete_room" }));
+});
+
+$("addPersonBtn").addEventListener("click", () => {
+  const name = prompt("Person name?");
+  if(!name) return;
+  if(!Array.isArray(state.people)) state.people = [];
+  const trimmed = name.trim().slice(0,30);
+  if(!trimmed) return;
+  const exists = state.people.some(p => p.name.trim().toLowerCase() === trimmed.toLowerCase());
+  if(exists){
+    alert("That name already exists in this room.");
+    return;
+  }
+  const p = { id: uid(), name: trimmed, cart: {} };
+  state.people.push(p);
+  state.activePersonId = p.id;
+  if(ws && ws.readyState === WebSocket.OPEN) sendPatch();
+  else render();
+});
+
+$("removePersonBtn").addEventListener("click", () => {
+  const p = getActivePerson();
+  if(!p) return;
+  if(!confirm(`Remove ${p.name} and their cart for everyone?`)) return;
+  state.people = state.people.filter(x => x.id !== p.id);
+  state.activePersonId = state.people[0]?.id || null;
+  sendPatch();
+});
+
+$("clearCartBtn").addEventListener("click", () => {
+  const p = getActivePerson();
+  if(!p) return;
+  if(!confirm(`Clear cart for ${p.name} for everyone?`)) return;
+  p.cart = {};
+  sendPatch();
+});
+
+/* Modal hooks */
+$("showAllBtn").addEventListener("click", showAll);
+$("expandAllBtn").addEventListener("click", () => setAllCollapsed(false));
+$("collapseAllBtn").addEventListener("click", () => setAllCollapsed(true));
+$("closeAllBtn").addEventListener("click", closeAll);
+$("copySummaryBtn").addEventListener("click", copySummary);
+$("allOverlay").addEventListener("click", (e) => {
+  if(e.target === $("allOverlay")) closeAll();
+});
+window.addEventListener("keydown", (e) => {
+  if(e.key === "Escape") closeAll();
+});
+
+setConn(false, "Disconnected");
+loadLocalAllergens();
+loadRoomHistory();
+updateRoomHistoryUI();
+connect();
+</script>
+</body>
+</html>
