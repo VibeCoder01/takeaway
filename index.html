@@ -114,11 +114,18 @@
       padding:0 10px 8px;
       display:flex;
       justify-content:flex-end;
+      gap:6px;
+      flex-wrap:wrap;
     }
     .legendActions .btn{
       font-size:12px;
       padding:6px 10px;
       border-radius:999px;
+    }
+    .legendActions .btn.active{
+      border-color: rgba(34,197,94,.55);
+      background: rgba(34,197,94,.16);
+      color: var(--text);
     }
     .legendItem{
       display:flex;
@@ -426,166 +433,187 @@
 <script>
 /* ===================== FULL MENU (literal JS data) ===================== */
 const MENU = [
+  {"category":"SPECIAL SET MEALS","items":[
+    {"id":"A","name":"Set Meal A / Per Person (Minimum for 2 persons)","price":30.9,"desc":"Mixed Hors D'oeuvres (Crispy Seaweed, Sesame Prawns on Toast, Crispy Won Ton, Satay Chicken on Skewers, Barbecued Spare Ribs). Crispy Aromatic Duck / Crispy Lamb. Peking Kung Po Chicken. Sizzling Fillet Steak with Black Pepper sauce. Fried Mixed Vegetables. Egg Fried Rice."},
+    {"id":"B","name":"Set Meal B / Per Person (Minimum for 2 persons)","price":31.9,"desc":"House Hors D'oeuvres (Crispy Seaweed, Butterfly Prawns, Smoked Spicy Shredded Chicken, Vegetarian Spring Rolls, Peking Spare Ribs). Crispy Aromatic Duck / Crispy Lamb. Shredded Chilli Beef. Sizzling King Prawns in Mandarin Sauce. Stir Fried Chicken with Mange Tout. Special Fried Rice."},
+    {"id":"C","name":"Set Meal C / Per Person (Minimum for 2 persons)","price":27.5,"desc":"Vegetarian Hors D'oeuvres (Crispy Seaweed, Crispy Vegetarian Spring Rolls, Fried Beancurds in Peppercorn Salt, Curry Samosa). Crispy Vegetarian Duck. Sizzling Vegetarian Chicken Black Bean. Sizzling Beancurd with Satay Sauce. Fried Mange Tout with Beansprouts. Mixed Vegetable Fried Rice."},
+    {"id":"D","name":"Set Meal D / Per Person (Minimum for 2 persons)","price":59.9,"desc":"Special Seafood Hors D'oeuvres (Crispy Seaweed, Paper Wrapped Prawns, Squid in Peppercorn Salt, Crispy Fried Scallops in Batter, Satay Prawns on Skewers). Baked Lobster. Sizzling Mandarin Fillet Steak. Stir Fried King Prawns with Asparagus. Chinese Vegetables with Oyster Sauce. Lotus Leaf Fried Rice."}
+  ]},
   {"category":"APPETISERS","items":[
-    {"id":"1","name":"Hot Mix Special（For 2）","price":15.6,"desc":"Crispy Seaweed, Satay Chicken on Skewers, Crispy Won Ton, Sesame Prawns on Toast & Dry Barbequed Spare Ribs"},
-    {"id":"2","name":"House Hors D'oeuvres (For  2)","price":16.6,"desc":"Crispy Seaweed, Butterfly Prawns, Peking Spare Ribs,Smoked Spicy Shredded Chicken & Vegetarian Spring Rolls"},
-    {"id":"3","name":"Spicy Mixed Starters (For 2) ①⑩","price":16.9,"desc":"Smoked Spicy Shredded Chicken, Smoked Spicy Shredded Beef, Thai-style Spare Ribs, Thai-style Chicken Wings & Vegetarian Spring Rolls"},
-    {"id":"4","name":"Crispy Seaweed","price":5.7,"desc":""},
-    {"id":"5","name":"Thai-style Chicken Wings ⑩","price":7.7,"desc":""},
-    {"id":"6","name":"Thai-style Spare Ribs ①⑩","price":7.9,"desc":""},
-    {"id":"7","name":"Fried King Prawns in Peppercorn Salt ①","price":8.7,"desc":""},
-    {"id":"8","name":"Sesame Prawns on Toast ①⑤","price":7.7,"desc":""},
-    {"id":"9","name":"Satay King Prawns on Skewers ①⑭","price":8.0,"desc":""},
-    {"id":"10","name":"Fried Squid In Peppercorn Salt ①⑧⑩","price":8.0,"desc":""},
-    {"id":"11","name":"Butterfly Prawns ①⑤","price":7.9,"desc":""},
-    {"id":"12","name":"Smoked Spicy Shredded Chicken ①⑩","price":7.7,"desc":""},
-    {"id":"13","name":"Smoked Spicy Shredded Beef ①⑩","price":8.3,"desc":""},
-    {"id":"14","name":"Spicy Roasted Crispy Lamb ①","price":9.9,"desc":""},
-    {"id":"15","name":"Spicy Roast Crispy Pork ①","price":8.0,"desc":""},
-    {"id":"16","name":"Smoked Spicy Shredded Lamb ①⑩","price":9.9,"desc":""},
-    {"id":"17","name":"Peking Spare Ribs","price":7.6,"desc":""},
-    {"id":"18","name":"Dry Barbequed Spare Ribs ①","price":7.6,"desc":""},
-    {"id":"19","name":"Spare Ribs with Szechuan Sauce ①⑩","price":7.6,"desc":""},
-    {"id":"20","name":"Spare Ribs with Hot & Sour Sauce ①⑩","price":7.6,"desc":""},
-    {"id":"21","name":"Crispy Aromatic Duck (Served With Pancakes) ②⑨","price":16.9,"desc":""},
-    {"id":"22","name":"Vegetarian Spring Rolls ⑩","price":5.5,"desc":""},
-    {"id":"23","name":"Mini Vegetarian Spring Rolls (10) ⑩","price":5.5,"desc":""},
-    {"id":"24","name":"Chicken Spring Rolls ⑩","price":6.4,"desc":""},
-    {"id":"25","name":"Won Ton ⑩","price":6.4,"desc":""},
-    {"id":"26","name":"Crispy Vegetable Won Ton ⑩","price":5.5,"desc":""},
-    {"id":"27","name":"Fried Chicken Wings in Peppercorn Salt ①","price":7.7,"desc":""},
-    {"id":"28","name":"Fried Chicken Wings in Barbeque Sauce ①","price":7.7,"desc":""},
-    {"id":"29","name":"Fried Chicken Wings in Hot & Sour Sauce ①⑩","price":7.7,"desc":""},
-    {"id":"30","name":"Prawn Crackers ①","price":3.2,"desc":""}
+    {"id":"1","name":"Hot Mix Special (Minimum for 2)","price":18.2,"desc":"Crispy Seaweed, Satay Chicken on Skewers, Crispy Won Ton, Sesame Prawns on Toast and Dry Barbecued Spare Ribs. Contains: Wheat, Crustaceans, Nut, Sesame, Soya."},
+    {"id":"2","name":"House Hors D'oeuvres (Minimum for 2)","price":19.2,"desc":"Crispy Seaweed, Butterfly Prawns, Smoked Spicy Shredded Chicken, Peking Spare Ribs and Vegetarian Spring Rolls. Contains: Crustaceans, Egg, Soya, Celery."},
+    {"id":"3","name":"Seafood Special Hors D'oeuvres (Minimum for 2)","price":21.5,"desc":"Crispy Seaweed, Squid in Peppercorn Salt, Crispy Fried Scallops, Paper Wrapped Prawns and Satay King Prawn on Skewers. Contains: Crustaceans, Egg."},
+    {"id":"4","name":"Vegetarian Hors D'oeuvres (Minimum for 2)","price":17.0,"desc":"Crispy Seaweed, Vegetarian Spring Rolls, Fried Beancurds in Peppercorn Salt and Curry Samosa. Contains: Soya, Wheat."},
+    {"id":"5","name":"Butterfly Prawns","price":9.9,"desc":"Contains: Crustaceans, Egg, Wheat."},
+    {"id":"6","name":"Paper Wrapped Prawns","price":9.9,"desc":"Contains: Crustacean, Egg."},
+    {"id":"7","name":"Fried King Prawns in Peppercorn Salt","price":9.9,"desc":"Contains: Egg, Crustacean. Gluten-free."},
+    {"id":"8","name":"Sesame Prawns on Toast","price":9.9,"desc":"Contains: Crustacean, Sesame."},
+    {"id":"9","name":"Satay King Prawns on Skewers","price":9.9,"desc":"Contains: Crustacean, Nut."},
+    {"id":"10","name":"Steamed Mixed Dim Sum","price":9.9,"desc":"Contains: Wheat, Crustaceans, Soya, Sesame, Egg."},
+    {"id":"11","name":"Steamed Dumplings","price":9.2,"desc":"Contains: Wheat, Soya."},
+    {"id":"12","name":"Grilled Dumplings","price":9.2,"desc":"Contains: Wheat, Soya."},
+    {"id":"13","name":"Fried Squid in Peppercorn Salt","price":9.9,"desc":"Contains: Crustacean, Egg, Wheat."},
+    {"id":"14","name":"Fried Scallops in Peppercorn Salt","price":12.8,"desc":"Contains: Egg, Molluscs. Gluten-free."},
+    {"id":"15","name":"Crispy Fried Scallops in Batter","price":12.8,"desc":"Contains: Wheat, Egg, Molluscs."},
+    {"id":"16","name":"Crispy Fried Won Ton","price":9.2,"desc":"Contains: Wheat, Crustacean, Egg."},
+    {"id":"17","name":"Dry Barbecued Spare Ribs","price":9.2,"desc":"Gluten-free."},
+    {"id":"18","name":"Barbecued Spare Ribs in Sauce","price":9.2,"desc":"Contains: Wheat."},
+    {"id":"19","name":"Ribs in Peppercorn Salt","price":9.2,"desc":"Contains: Egg. Gluten-free."},
+    {"id":"20","name":"Peking Spare Ribs","price":9.2,"desc":"Contains: Celery."},
+    {"id":"21","name":"Smoked Spicy Shredded Chicken","price":9.2,"desc":"Contains: Soya, Wheat."},
+    {"id":"22","name":"Satay Chicken on Skewers","price":9.2,"desc":"Contains: Nut."},
+    {"id":"23","name":"Fried Chicken in Peppercorn Salt","price":9.2,"desc":"Contains: Egg. Gluten-free."},
+    {"id":"24","name":"Pork Chop in Peppercorn Salt","price":9.2,"desc":"Gluten-free."},
+    {"id":"25a","name":"Fried Chicken Wings in Peppercorn Salt","price":8.9,"desc":"Contains: Egg, Wheat."},
+    {"id":"25b","name":"Fried Chicken Wings in Mandarin Sauce","price":8.9,"desc":"Contains: Egg, Wheat, Celery."},
+    {"id":"25","name":"Fried Beancurd in Peppercorn Salt","price":9.2,"desc":"Vegan. Contains: Soya."},
+    {"id":"26","name":"Curry Samosa","price":6.7,"desc":"Vegan. Contains: Wheat."},
+    {"id":"27","name":"Crispy Seaweed","price":6.7,"desc":"Vegan. Gluten-free."},
+    {"id":"28","name":"Crispy Vegetarian Spring Rolls","price":6.7,"desc":"Vegan. Contains: Wheat."},
+    {"id":"29","name":"Prawn Crackers","price":3.8,"desc":"Gluten-free. Contains: Crustaceans."}
   ]},
   {"category":"SPECIAL ELABORATE STARTERS","items":[
-    {"id":"31","name":"Baked Lobster  ①⑨","price":65.0,"desc":"with cheese, shallots and ginger and chilli sauce"},
-    {"id":"32","name":"King Prawns ①②","price":15.9,"desc":"with Salt & Peppercorn"},
-    {"id":"33","name":"King Prawns ①②","price":15.9,"desc":"with Chilli Sauce"},
-    {"id":"34","name":"King Prawns ①②","price":15.9,"desc":"with Thai-style Sauce"},
-    {"id":"35","name":"Peking Duck (Minimum for 4)","price":68.0,"desc":"Served with Pancake,Cucumber,Spring onion & Hoi-Sin Sauce"},
-    {"id":"35a","name":"Extra Pancake Portion","price":2.0,"desc":""}
+    {"id":"30","name":"Baked Lobster","price":68.0,"desc":"Contains: Crustaceans, Soya. With Ginger and Spring Onions / Black Bean Sauce."},
+    {"id":"31","name":"Soft Shell Crab in Peppercorn Salt (2)","price":16.8,"desc":"Contains: Egg, Crustaceans. Gluten-free."},
+    {"id":"32","name":"Crispy Vegetarian Duck","price":11.8,"desc":"Vegan. Contains: Soya, Wheat. Served with pancake cucumber spring onion & Hoi-Sin Sauce."},
+    {"id":"33","name":"Crispy Aromatic Lamb","price":13.8,"desc":"Contains: Wheat. Served with Pancake Cucumber, Spring Onion & Plum Sauce."},
+    {"id":"34A","name":"Crispy Aromatic Duck Quarter","price":13.8,"desc":"Contains: Wheat. Served with Pancake, Cucumber, Spring Onion & Hoi-Sin Sauce."},
+    {"id":"34","name":"Crispy Aromatic Duck Half","price":26.5,"desc":"Contains: Wheat. Served with Pancake, Cucumber, Spring Onion & Hoi-Sin Sauce."}
   ]},
   {"category":"SOUPS","items":[
-    {"id":"36","name":"Tom Yum Seafood Soup ( Thai-style) ⑨","price":5.2,"desc":""},
-    {"id":"37","name":"Hot & Sour Soup ⑨","price":4.7,"desc":""},
-    {"id":"38","name":"Sweetcorn Soup ⑨","price":4.7,"desc":""},
-    {"id":"39","name":"Crabmeat & Sweetcorn Soup ⑨","price":4.7,"desc":""},
-    {"id":"40","name":"Won Ton Soup ⑨⑩","price":4.7,"desc":""},
-    {"id":"41","name":"Chicken & Sweetcorn Soup ⑨","price":4.7,"desc":""},
-    {"id":"42","name":"Chicken Muchroom Soup ⑨","price":4.7,"desc":""},
-    {"id":"43","name":"Chicken Noodle Soup ⑨","price":4.7,"desc":""}
+    {"id":"35","name":"Tom Yum Chicken Soup (Thai-Style)","price":5.5,"desc":"Contains: Soya."},
+    {"id":"36","name":"Tom Yum Seafood Soup (Thai-Style)","price":5.9,"desc":"Contains: Soya, Crustaceans."},
+    {"id":"37","name":"Hot and Sour Soup","price":4.8,"desc":"Contains: Soya, Egg, Crustaceans."},
+    {"id":"38","name":"Vegetarian Hot and Sour Soup","price":4.2,"desc":"Vegan. Contains: Soya."},
+    {"id":"39","name":"Won Ton Soup","price":4.8,"desc":"Contains: Wheat, Crustaceans, Soya."},
+    {"id":"40","name":"Crab Meat and Sweetcorn Soup","price":4.8,"desc":"Gluten-free. Contains: Crustaceans."},
+    {"id":"41","name":"Chicken and Sweetcorn Soup","price":4.8,"desc":"Gluten-free."},
+    {"id":"42","name":"Mixed Vegetables Soup","price":4.2,"desc":"Vegan. Contains: Soya."},
+    {"id":"43","name":"Chicken Mushroom Soup","price":4.8,"desc":"Contains: Soya."},
+    {"id":"44","name":"Chicken Noodle Soup","price":4.8,"desc":"Contains: Soya."}
+  ]},
+  {"category":"SIZZLING HOT PLATES","items":[
+    {"id":"45","name":"Sizzling Mixed Seafood Platter","price":14.8,"desc":"Contains: Crustacean, Molluscs, Soya."},
+    {"id":"46","name":"Sizzling King Prawns with Black Bean Sauce","price":13.9,"desc":"Contains: Crustacean, Soya."},
+    {"id":"47","name":"Sizzling King Prawns in Mandarin Sauce","price":13.9,"desc":"Contains: Crustaceans, Celery."},
+    {"id":"48","name":"Sizzling King Prawns Ginger and Spring Onions","price":13.9,"desc":"Contains: Crustaceans, Soya."},
+    {"id":"49","name":"Sizzling Mandarin Fillet Steak","price":17.5,"desc":"Contains: Celery."},
+    {"id":"50","name":"Sizzling Fillet Steak with Black Pepper Sauce","price":17.5,"desc":"Contains: Soya."},
+    {"id":"51","name":"Sizzling Beef with Satay Sauce","price":12.5,"desc":"Contains: Nut, Soya, Fish Sauce."},
+    {"id":"52","name":"Sizzling Beef with Black Bean Sauce","price":12.5,"desc":"Contains: Soya."},
+    {"id":"53","name":"Sizzling Beef with Ginger and Spring Onions","price":12.5,"desc":"Contains: Soya."},
+    {"id":"54","name":"Sizzling Lamb with Black Bean Sauce","price":12.5,"desc":"Contains: Soya."},
+    {"id":"55","name":"Sizzling Lamb with Ginger and Spring Onions","price":12.5,"desc":"Contains: Soya."},
+    {"id":"56","name":"Sizzling Chicken with Satay Sauce","price":12.5,"desc":"Contains: Nut, Soya, Fish Sauce."},
+    {"id":"57","name":"Sizzling Chicken with Black Bean Sauce","price":12.5,"desc":"Contains: Soya."},
+    {"id":"58","name":"Sizzling Chicken with Ginger and Spring Onions","price":12.5,"desc":"Contains: Soya."},
+    {"id":"59","name":"Sizzling Sliced Fillet of Pork in Mandarin Sauce","price":12.5,"desc":"Contains: Celery."},
+    {"id":"60","name":"Sizzling Bean Curd with Satay Sauce","price":9.8,"desc":"Vegan. Contains: Nut, Soya."},
+    {"id":"61","name":"Sizzling Bean Curd with Black Bean Sauce","price":9.8,"desc":"Vegan. Contains: Soya."},
+    {"id":"62","name":"Sizzling Vegetarian Chicken with Black Bean Sauce","price":9.8,"desc":"Vegan. Contains: Soya."}
   ]},
   {"category":"SEAFOOD DISHES","items":[
-    {"id":"44","name":"Mixed Seafood Platter ①②⑨","price":12.9,"desc":""},
-    {"id":"45","name":"Thai-style King Prawns ①②⑩","price":9.9,"desc":""},
-    {"id":"46","name":"King Prawns in Garlic & Chilli Sauce ①②⑩","price":9.9,"desc":""},
-    {"id":"47","name":"Szechuan King Prawns ①②⑩","price":9.9,"desc":""},
-    {"id":"48","name":"King Prawns with Cashewnuts and Yellow Bean Sauce ②③⑩","price":9.9,"desc":""},
-    {"id":"49","name":"King Prawns with Ginger and Spring Onions ②⑨","price":9.9,"desc":""},
-    {"id":"50","name":"King Prawns with Green Pepper in Black Bean Sauce ②⑨⑩","price":9.9,"desc":""},
-    {"id":"51","name":"King Prawns with Oyster Sauce ②⑨⑩","price":9.9,"desc":""},
-    {"id":"52","name":"King Prawns with Lemon Sauce ①②","price":9.9,"desc":""},
-    {"id":"53","name":"Sweet & Sour King Prawns ②","price":9.9,"desc":""},
-    {"id":"54","name":"Curry King Prawns ①②⑩","price":9.9,"desc":""},
-    {"id":"55","name":"Thai-style King Prawns ②⑩","price":9.9,"desc":""},
-    {"id":"56","name":"Fried Scallops with Garlic & Chilli Sauce ②⑨⑩","price":9.5,"desc":""},
-    {"id":"57","name":"Fried Scallops with Ginger and Spring Onions ②⑨","price":9.5,"desc":""},
-    {"id":"58","name":"Fried Scallops with Szechuan Sauce ②⑨⑩","price":9.5,"desc":""},
-    {"id":"59","name":"Fried Mussels with Special Chilli Sauce ②⑨","price":9.5,"desc":""}
+    {"id":"63","name":"Steam Sea Bass with Spring Onions and Soya Sauce","price":25.8,"desc":"Contains: Fish, Soya."},
+    {"id":"64","name":"Thai Style King Prawns","price":12.9,"desc":"Contains: Egg, Sesame, Crustacean."},
+    {"id":"65","name":"Peking Kung Po King Prawns","price":12.9,"desc":"Contains: Egg, Soya."},
+    {"id":"66","name":"Fierce Chilli King Prawns","price":12.9,"desc":"Contains: Crustacean, Soya."},
+    {"id":"67","name":"Steamed Garlic Prawns","price":12.9,"desc":"Contains: Crustacean, Soya."},
+    {"id":"68","name":"Sweet and Sour Prawns (Hong Kong Style)","price":12.9,"desc":"Gluten-free. Contains: Egg, Crustaceans."},
+    {"id":"69","name":"Sweet and Sour Prawn Balls","price":12.9,"desc":"Contains: Wheat, Egg."},
+    {"id":"70","name":"King Prawns Szechuan Style","price":12.9,"desc":"Contains: Wheat, Soya."},
+    {"id":"71","name":"King Prawns with Asparagus","price":12.9,"desc":"Contains: Crustacean, Soya."},
+    {"id":"72","name":"King Prawns with Cashewnuts and Yellow Bean Sauce","price":12.9,"desc":"Contains: Nut, Soya, Wheat."},
+    {"id":"73","name":"Quick Fried Scallops","price":13.8,"desc":"Contains: Mollusc, Soya."},
+    {"id":"74","name":"Steamed Scallops with Garlic or Black Bean Sauce (Min 2) (Each)","price":7.8,"desc":"Contains: Mollusc, Soya."},
+    {"id":"75","name":"Fried Mussels in Black Bean Sauce","price":14.5,"desc":"Contains: Mollusc, Soya."},
+    {"id":"76","name":"Fried Mussels with Special Chilli Sauce","price":14.5,"desc":"Contains: Molluscs, Soya."}
   ]},
   {"category":"MEAT DISHES","items":[
-    {"id":"60","name":"Mandarin Fillet Steak ⑪","price":13.6,"desc":""},
-    {"id":"61","name":"Fillet Steak with Green Pepper in Black Bean Sauce ⑪⑩","price":13.6,"desc":""},
-    {"id":"62","name":"Fillet Steak with Ginger and Spring Onions ⑪⑨","price":13.6,"desc":""},
-    {"id":"63","name":"Fillet Steak in Oyster Sauce ⑪⑨⑩","price":13.6,"desc":""},
-    {"id":"64","name":"Szechuan Fillet Steak ⑪⑩","price":13.6,"desc":""},
-    {"id":"65","name":"Fillet Steak with Garlic and Chilli Sauce ⑪⑩","price":13.6,"desc":""},
-    {"id":"66","name":"Fillet Steak Cantonese Style ⑪⑩","price":13.6,"desc":""},
-    {"id":"67","name":"Satay Beef ⑪⑭","price":8.0,"desc":""},
-    {"id":"68","name":"Beef with Green Pepper in Black Bean Sauce ⑪⑨⑩","price":8.0,"desc":""},
-    {"id":"69","name":"Beef with Ginger and Spring Onions ⑪⑨","price":8.0,"desc":""},
-    {"id":"70","name":"Beef with Oyster Sauce ⑪⑨⑩","price":8.0,"desc":""},
-    {"id":"71","name":"Szechuan Beef ⑪⑩","price":8.0,"desc":""},
-    {"id":"72","name":"Beef with Garlic & Chilli Sauce ⑪⑩","price":8.0,"desc":""},
-    {"id":"73","name":"Sweet & Sour Pork (Hong kong style) ⑧","price":8.0,"desc":""},
-    {"id":"74","name":"Cantonese Roast Pork ⑨⑩","price":8.0,"desc":""}
+    {"id":"77","name":"Crispy Shredded Chilli Beef","price":9.9,"desc":"Contains: Egg."},
+    {"id":"78","name":"Beef with Chilli and Lemon Grass","price":9.9,"desc":"Contains: Soya, Fish Sauce."},
+    {"id":"79","name":"Beef with Fresh Mushrooms","price":9.9,"desc":"Contains: Soya."},
+    {"id":"80","name":"Beef with Oyster Sauce","price":9.9,"desc":"Contains: Molluscs."},
+    {"id":"81","name":"Sweet and Sour Pork (Hong Kong Style)","price":9.9,"desc":"Contains: Egg. Gluten-free."},
+    {"id":"82","name":"Cantonese Roast Pork","price":9.9,"desc":"Contains: Wheat, Soya."}
   ]},
   {"category":"DUCK DISHES","items":[
-    {"id":"75","name":"Duck with Plum Sauce","price":8.7,"desc":""},
-    {"id":"76","name":"Duck with Pineapple","price":8.7,"desc":""},
-    {"id":"77","name":"Duck with Ginger and Spring Onions ⑨","price":8.7,"desc":""},
-    {"id":"78","name":"Duck with Green Pepper in Black Bean Sauce ⑨⑩","price":8.7,"desc":""},
-    {"id":"79","name":"Cantonese Roast Duck ⑨⑩","price":8.7,"desc":""}
+    {"id":"83","name":"Duck with Plum Sauce","price":10.5,"desc":"Gluten-free."},
+    {"id":"84","name":"Duck with Pineapple","price":10.5,"desc":"Gluten-free."},
+    {"id":"85","name":"Duck with Black Bean Sauce","price":10.5,"desc":"Contains: Soya."},
+    {"id":"86","name":"Duck with Ginger and Spring Onions","price":10.5,"desc":"Contains: Soya."},
+    {"id":"87","name":"Cantonese Roast Duck","price":10.5,"desc":"Contains: Soya, Wheat."}
   ]},
   {"category":"POULTRY DISHES","items":[
-    {"id":"80","name":"Chicken Chinese Style ⑨⑩","price":7.7,"desc":""},
-    {"id":"81","name":"Thai-style Chicken ⑩","price":7.7,"desc":""},
-    {"id":"82","name":"Chicken with Ginger and Spring Onions ⑨","price":7.7,"desc":""},
-    {"id":"83","name":"Chicken with Green Pepper in Black Bean Sauce ⑨⑩","price":7.7,"desc":""},
-    {"id":"84","name":"Chicken with Oyster Sauce ⑨⑩","price":7.7,"desc":""},
-    {"id":"85","name":"Sweet & Sour Chicken Hong Kong Style ⑧","price":7.7,"desc":""},
-    {"id":"86","name":"Szechuan Chicken ⑩","price":7.7,"desc":""},
-    {"id":"87","name":"Chicken with Garlic and Chilli Sauce ⑩","price":7.7,"desc":""},
-    {"id":"88","name":"Chicken with Lemon Sauce ①","price":7.7,"desc":""},
-    {"id":"89","name":"Chicken with Tomato Sauce ⑧","price":7.7,"desc":""},
-    {"id":"90","name":"Chicken with Pineapple ⑧","price":7.7,"desc":""},
-    {"id":"91","name":"Chicken with Mushroom ⑨","price":7.7,"desc":""},
-    {"id":"92","name":"Chicken with Bamboo Shoots and Water Chestnuts ⑨","price":7.7,"desc":""},
-    {"id":"93","name":"Chicken with Mixed Vegetables ⑨","price":7.7,"desc":""},
-    {"id":"94","name":"Chicken with Cashewnuts and Yellow Bean Sauce ③⑩","price":7.7,"desc":""}
+    {"id":"88","name":"Thai Style Chicken","price":9.9,"desc":"Contains: Egg, Sesame."},
+    {"id":"89","name":"Crispy Shredded Chilli Chicken","price":9.9,"desc":"Contains: Egg."},
+    {"id":"90","name":"Peking Kung Po Chicken","price":9.9,"desc":"Contains: Egg, Soya."},
+    {"id":"91","name":"Sweet and Sour Chicken (Hong Kong Style)","price":9.9,"desc":"Contains: Egg. Gluten-free."},
+    {"id":"92","name":"Sweet and Sour Chicken Balls","price":9.9,"desc":"Contains: Wheat, Egg."},
+    {"id":"93","name":"Lemon Chicken","price":9.9,"desc":"Contains: Egg. Gluten-free."},
+    {"id":"94","name":"Chicken Szechuan Style","price":9.9,"desc":"Contains: Soya."},
+    {"id":"95","name":"Chicken Chinese Style","price":9.9,"desc":"Contains: Soya, Wheat."},
+    {"id":"96","name":"Chicken with Chilli and Lemon Grass","price":9.9,"desc":"Contains: Soya, Fish Sauce."},
+    {"id":"97","name":"Chicken with Pineapple","price":9.9,"desc":"Gluten-free."},
+    {"id":"98","name":"Chicken with Fresh Mushrooms","price":9.9,"desc":"Contains: Soya."},
+    {"id":"99","name":"Chicken with Mixed Vegetables","price":9.9,"desc":"Contains: Soya."},
+    {"id":"100","name":"Chicken with Oyster Sauce","price":9.9,"desc":"Contains: Soya, Molluscs."},
+    {"id":"101","name":"Chicken with Cashewnuts and Yellow Bean Sauce","price":9.9,"desc":"Contains: Nut, Soya, Wheat."}
   ]},
   {"category":"CURRY","items":[
-    {"id":"97","name":"Special Curry ①⑩","price":8.7,"desc":""},
-    {"id":"98","name":"Shrimp Curry ①⑩","price":8.7,"desc":""},
-    {"id":"99","name":"Chicken Curry ①⑩","price":7.7,"desc":""},
-    {"id":"100","name":"Beef Curry ①⑩","price":8.0,"desc":""},
-    {"id":"101","name":"Roast Pork Curry ①⑩","price":8.0,"desc":""},
-    {"id":"102","name":"King Prawns with Red Thai Curry ①④⑩","price":9.9,"desc":""},
-    {"id":"103","name":"King Prawns with Green Thai Curry ①④⑩","price":9.9,"desc":""},
-    {"id":"104","name":"Chicken with Green Thai Curry ①④⑩","price":9.6,"desc":""},
-    {"id":"105","name":"Chicken with Red Thai Curry ④⑩","price":9.6,"desc":""}
+    {"id":"102","name":"Special Curry","price":9.9,"desc":"Contains: Wheat, Crustaceans."},
+    {"id":"103","name":"King Prawns Curry","price":9.9,"desc":"Contains: Wheat, Crustaceans."},
+    {"id":"104","name":"Chicken Curry","price":9.9,"desc":"Contains: Wheat."},
+    {"id":"105","name":"Beef Curry","price":9.9,"desc":"Contains: Wheat."},
+    {"id":"106","name":"Lamb Curry","price":9.9,"desc":"Contains: Wheat."},
+    {"id":"107","name":"Mixed Vegetable Curry","price":7.9,"desc":"Vegan. Contains: Wheat."},
+    {"id":"108","name":"King Prawns with Red Thai Curry","price":12.9,"desc":"Contains: Milk, Wheat, Crustaceans, Fish Sauce."},
+    {"id":"109","name":"Chicken with Red Thai Curry","price":12.9,"desc":"Contains: Milk, Wheat, Crustaceans, Fish Sauce."}
   ]},
   {"category":"BEANCURD & VEGETABLES","items":[
-    {"id":"107","name":"Braised Beancurd Family Style ⑨","price":7.2,"desc":""},
-    {"id":"108","name":"Fried Beancurd with Garlic and Chilli Sauce ⑩","price":7.2,"desc":""},
-    {"id":"109","name":"Fried Beancurd with Szechuan Sauce ⑩","price":7.2,"desc":""},
-    {"id":"110","name":"Fried Beancurd with Mixed Vegetables ⑨","price":7.2,"desc":""},
-    {"id":"111","name":"Mixed Vegetables Family Style ⑨","price":6.7,"desc":""},
-    {"id":"112","name":"Stir Fried Mange Tout","price":6.7,"desc":""},
-    {"id":"113","name":"Stir Fried Mixed Vegetables with Oyster Sauce ⑨⑩","price":6.7,"desc":""},
-    {"id":"114","name":"Stir Fried Mixed Vegetables with Garlic & Chilli Sauce ⑩","price":6.7,"desc":""},
-    {"id":"115","name":"Stir Fried Mixed Vegetables with Black Bean Sauce ⑨⑩","price":6.7,"desc":""},
-    {"id":"116","name":"Stir Fried Mixed Vegetables with Szechuan Sauce ⑩","price":6.7,"desc":""},
-    {"id":"117","name":"Stir Fried Mixed Vegetables with Curry Sauce ①⑩","price":6.7,"desc":""},
-    {"id":"118","name":"Stir Fried Mixed Vegetables with Sweet & Sour Sauce ⑧","price":6.7,"desc":""},
-    {"id":"121","name":"Fried Mixed Vegetables with Satay Sauce ⑨⑩⑭","price":6.7,"desc":""}
+    {"id":"110","name":"Braised Bean Curd Family Style (Hot)","price":7.5,"desc":"Contains: Soya."},
+    {"id":"111","name":"Fried Bamboo Shoots and Chinese Mushrooms","price":7.5,"desc":"Vegan. Contains: Soya."},
+    {"id":"112","name":"Chinese Vegetables with Oyster Sauce","price":7.5,"desc":"Contains: Molluscs."},
+    {"id":"112A","name":"Chinese Vegetables with Garlic Sauce","price":7.5,"desc":"Vegan. Gluten-free."},
+    {"id":"113","name":"Fried Aubergine with Special Chilli Sauce","price":7.5,"desc":"Contains: Soya."},
+    {"id":"114","name":"Fried French Beans with Garlic","price":7.5,"desc":"Vegan. Gluten-free."},
+    {"id":"115","name":"Fried Mixed Vegetables with Sweet Sour Sauce","price":7.5,"desc":"Vegan."},
+    {"id":"116","name":"Fried Mixed Vegetables with Garlic Sauce","price":7.5,"desc":"Vegan."},
+    {"id":"117","name":"Fried Mixed Vegetables with Satay Sauce","price":7.5,"desc":"Vegan. Contains: Soya, Nut, Wheat."},
+    {"id":"118","name":"Fried Mixed Vegetables with Black Bean Sauce","price":7.5,"desc":"Contains: Soya."},
+    {"id":"119","name":"Fried Beansprouts with Garlic","price":7.5,"desc":"Vegan. Gluten-free."},
+    {"id":"120","name":"Fried Broccoli with Garlic Sauce","price":7.5,"desc":"Vegan. Gluten-free."},
+    {"id":"121","name":"Fried Mange Tout with Garlic","price":7.5,"desc":"Vegan. Gluten-free."}
   ]},
-  {"category":"RICE DISHES","items":[
-    {"id":"122","name":"Lotus Leaf Wrapped Fried Rice ①⑧","price":11.8,"desc":""},
-    {"id":"123","name":"Fried Rice (Beef /Chicken / Roast Pork) ⑧","price":5.9,"desc":""},
-    {"id":"124","name":"Shrimp Fried Rice ⑧","price":5.9,"desc":""},
-    {"id":"125","name":"Special Fried Rice ⑧","price":6.2,"desc":""},
-    {"id":"126","name":"Chicken & Roast Pork Fried Rice ⑧","price":6.2,"desc":""},
-    {"id":"127","name":"Thai-style Fried Rice ⑧⑩","price":6.2,"desc":""},
-    {"id":"128","name":"Vegetarian Fried Rice ⑧","price":5.9,"desc":""},
-    {"id":"129","name":"Mushroom Fried Rice ⑧","price":5.9,"desc":""},
-    {"id":"130","name":"Pineapple Fried Rice ⑧","price":5.9,"desc":""},
-    {"id":"131","name":"Tomato Fried Rice ⑧","price":5.9,"desc":""},
-    {"id":"132","name":"Egg Fried Rice ⑧","price":4.9,"desc":""},
-    {"id":"133","name":"Boiled Rice","price":4.6,"desc":""}
+  {"category":"RICE","items":[
+    {"id":"122","name":"Lotus Leaf Wrapped Fried Rice","price":12.8,"desc":"Contains: Crustacean, Egg. Fried rice with chicken, prawns, duck and roast pork wrapped in lotus leaf."},
+    {"id":"123","name":"Special Fried Rice","price":7.6,"desc":"Contains: Crustacean, Egg. Gluten-free."},
+    {"id":"124","name":"Hot Singapore Fried Rice","price":7.6,"desc":"Contains: Crustacean, Egg. Gluten-free."},
+    {"id":"125","name":"King Prawns Fried Rice","price":8.9,"desc":"Gluten-free. Contains: Crustacean, Egg."},
+    {"id":"126","name":"Shrimps Fried Rice","price":7.6,"desc":"Gluten-free. Contains: Crustacean, Egg."},
+    {"id":"127","name":"Chicken Fried Rice","price":6.9,"desc":"Gluten-free. Contains: Crustacean, Egg."},
+    {"id":"128","name":"Beef Fried Rice","price":6.9,"desc":"Gluten-free. Contains: Crustacean, Egg."},
+    {"id":"129","name":"Mushroom Fried Rice","price":5.9,"desc":"Vegan. Gluten-free."},
+    {"id":"130","name":"Mixed Vegetable Fried Rice","price":5.9,"desc":"Vegan. Gluten-free."},
+    {"id":"131","name":"Egg Fried Rice","price":5.3,"desc":"Gluten-free."},
+    {"id":"132","name":"Boiled Rice","price":4.7,"desc":"Vegan. Gluten-free."}
   ]},
-  {"category":"NOODLE DISHES","items":[
-    {"id":"134","name":"Stir Fried Noodles with (Beef/Chicken/Roast Pork) ⑩","price":6.2,"desc":""},
-    {"id":"135","name":"Shrimp Noodles ⑩","price":6.2,"desc":""},
-    {"id":"136","name":"Special Noodles ⑩","price":6.7,"desc":""},
-    {"id":"137","name":"Vegetarian Noodles ⑩","price":6.2,"desc":""},
-    {"id":"138","name":"Singapore Vermicelli ①⑩","price":6.7,"desc":""}
-  ]},
-  {"category":"SPECIAL SET MEALS","items":[
-    {"id":"A","name":"Set Meal A / Per Person (Minimum for 2 persons)","price":25.8,"desc":"Crispy Seaweed, Sesame Prawns on Toast, Satay Chicken... Sweet & Sour Chicken, Beef with Black Pepper Sauce, Fried Mixed Vegetables, Egg Fried Rice"},
-    {"id":"B","name":"Set Meal B / Per Person (Minimum for 2 persons)","price":27.8,"desc":"Crispy Seaweed, Butterfly Prawns, Smoked Spicy Shred... Beef with Ginger & Spring Onion, Stir Fried Chicken with Mange Tout, Special Fried Rice"},
-    {"id":"C","name":"Set Meal C / Per Person (Minimum for 2 persons)","price":23.0,"desc":"Vegetarian Spring Rolls, Sweetcorn Soup, Sweet & Sour Vegetables, Mixed Vegetables in Satay Sauce, Egg Fried Rice"}
+  {"category":"CHOW MEIN (SOFT NOODLES)","items":[
+    {"id":"133","name":"Phad Thai (Flat Rice Noodles fried with Chicken)","price":9.5,"desc":"Gluten-free. Contains: Nut, Fish Sauce."},
+    {"id":"134","name":"Phad Thai (Flat Rice Noodles fried with Prawns)","price":9.9,"desc":"Gluten-free. Contains: Nut, Fish Sauce."},
+    {"id":"135","name":"Phad Thai (Flat Rice Noodles fried with Vegetables)","price":7.9,"desc":"Gluten-free. Contains: Nut, Fish Sauce."},
+    {"id":"136","name":"Special Chow Mein (Dry)","price":7.9,"desc":"Contains: Crustaceans, Soya, Wheat."},
+    {"id":"137","name":"Hot Singapore Fried Rice Noodles (Chicken, Roast Pork and Shrimps)","price":7.9,"desc":"Gluten-free. Contains: Egg, Crustaceans."},
+    {"id":"138","name":"Vegetarian Hot Singapore Fried Rice Noodles","price":7.9,"desc":"Vegan. Gluten-free."},
+    {"id":"139","name":"Shredded Duck Fried Rice Noodles","price":8.8,"desc":"Gluten-free."},
+    {"id":"140","name":"King Prawns Chow Mein","price":9.9,"desc":"Contains: Crustacean, Soya."},
+    {"id":"141","name":"Shrimps Chow Mein","price":7.6,"desc":"Contains: Crustacean, Soya."},
+    {"id":"142","name":"Chicken Chow Mein","price":7.6,"desc":"Gluten-free."},
+    {"id":"143","name":"Beef Chow Mein","price":7.6,"desc":"Contains: Soya."},
+    {"id":"144","name":"Roast Pork Chow Mein","price":7.6,"desc":"Contains: Soya."},
+    {"id":"145","name":"Mushroom Chow Mein","price":6.9,"desc":"Vegan. Contains: Soya."},
+    {"id":"146","name":"Mixed Vegetable Chow Mein","price":6.9,"desc":"Vegan. Contains: Soya."},
+    {"id":"147","name":"Noodles with Beansprouts","price":5.9,"desc":"Vegan. Contains: Soya."},
+    {"id":"148","name":"Plain Noodles","price":5.9,"desc":"Vegan. Contains: Soya."}
   ]}
 ];
 
@@ -596,6 +624,7 @@ let state = { people: [], activePersonId: null, ui: { search: "" } };
 let openCats = new Set();
 let localAllergens = new Set();
 let roomHistory = [];
+let dietFilters = { vegan: false, glutenFree: false };
 
 function loadLocalAllergens(){
   try{
@@ -611,6 +640,25 @@ function loadLocalAllergens(){
 function saveLocalAllergens(){
   const arr = Array.from(localAllergens).sort((a,b) => a - b);
   localStorage.setItem("menuPickerAllergens", JSON.stringify(arr));
+}
+
+function loadDietFilters(){
+  try{
+    const raw = localStorage.getItem("menuPickerDietFilters");
+    const obj = raw ? JSON.parse(raw) : null;
+    if(obj && typeof obj === "object"){
+      dietFilters = {
+        vegan: !!obj.vegan,
+        glutenFree: !!obj.glutenFree,
+      };
+    }
+  }catch{
+    dietFilters = { vegan: false, glutenFree: false };
+  }
+}
+
+function saveDietFilters(){
+  localStorage.setItem("menuPickerDietFilters", JSON.stringify(dietFilters));
 }
 
 function loadRoomHistory(){
@@ -666,14 +714,10 @@ const ALLERGENS = [
   { code: 4, label: "Milk", char: "④" },
   { code: 5, label: "Sesame seed", char: "⑤" },
   { code: 6, label: "Fish", char: "⑥" },
-  { code: 7, label: "Mustard", char: "⑦" },
   { code: 8, label: "Egg", char: "⑧" },
   { code: 9, label: "Soya", char: "⑨" },
   { code: 10, label: "Cereal containing gluten", char: "⑩" },
   { code: 11, label: "Celery", char: "⑪" },
-  { code: 12, label: "Sulphur dioxide", char: "⑫" },
-  { code: 13, label: "Lupin", char: "⑬" },
-  { code: 14, label: "Peanuts", char: "⑭" },
 ];
 const ALLERGEN_CHAR_TO_CODE = Object.fromEntries(ALLERGENS.map(a => [a.char, a.code]));
 
@@ -732,15 +776,49 @@ function menuItemMatchesSearch(item, q){
 }
 
 function itemAllergens(item){
-  const name = String(item.name || "");
-  const matches = name.match(/[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭]/g) || [];
-  return matches.map(ch => ALLERGEN_CHAR_TO_CODE[ch]).filter(Boolean);
+  const text = `${item.name || ""} ${item.desc || ""}`.toLowerCase();
+  const codes = new Set();
+
+  const matches = text.match(/[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭]/g) || [];
+  matches.forEach((ch) => {
+    const code = ALLERGEN_CHAR_TO_CODE[ch];
+    if(code) codes.add(code);
+  });
+
+  const keywordMap = [
+    { code: 1, terms: ["crustacean", "crustaceans", "prawn", "prawns", "shrimp", "shrimps", "lobster", "crab", "crabmeat", "crab meat"] },
+    { code: 2, terms: ["mollusc", "molluscs", "scallop", "scallops", "mussel", "mussels", "squid", "octopus", "cuttlefish", "oyster sauce", "oyster"] },
+    { code: 3, terms: ["nut", "nuts", "cashew", "cashewnut", "cashewnuts", "peanut", "peanuts", "satay"] },
+    { code: 4, terms: ["milk", "cream", "butter", "cheese"] },
+    { code: 5, terms: ["sesame"] },
+    { code: 6, terms: ["fish", "fish sauce", "sea bass", "seabass"] },
+    { code: 7, terms: ["mustard"] },
+    { code: 8, terms: ["egg", "eggs"] },
+    { code: 9, terms: ["soya", "soy"] },
+    { code: 10, terms: ["wheat", "gluten", "cereal", "noodle", "noodles", "pancake", "batter"] },
+    { code: 11, terms: ["celery"] },
+    { code: 12, terms: ["sulphur dioxide", "sulfur dioxide", "sulphur"] },
+    { code: 13, terms: ["lupin"] },
+  ];
+
+  keywordMap.forEach(({code, terms}) => {
+    if(terms.some(term => text.includes(term))) codes.add(code);
+  });
+
+  return Array.from(codes);
 }
 
 function itemBlockedByAllergens(item, blocked){
   if(!blocked || blocked.size === 0) return false;
   const codes = itemAllergens(item);
   return codes.some(c => blocked.has(c));
+}
+
+function itemMatchesDiet(item){
+  const text = `${item.name || ""} ${item.desc || ""}`.toLowerCase();
+  if(dietFilters.vegan && !text.includes("vegan")) return false;
+  if(dietFilters.glutenFree && !text.includes("gluten-free") && !text.includes("gluten free")) return false;
+  return true;
 }
 
 function sendPatch(){
@@ -862,8 +940,9 @@ function renderMenu(){
   let shownItems = 0, totalItems = 0;
   const blocked = localAllergens;
 
+  const dietSelectedCount = (dietFilters.vegan ? 1 : 0) + (dietFilters.glutenFree ? 1 : 0);
   const legendDetails = document.createElement("details");
-  legendDetails.open = q.length > 0 || openCats.has("allergen-key");
+  legendDetails.open = openCats.has("allergen-key");
   legendDetails.addEventListener("toggle", () => {
     if(legendDetails.open) openCats.add("allergen-key");
     else openCats.delete("allergen-key");
@@ -872,7 +951,7 @@ function renderMenu(){
   legendSummary.innerHTML = `
       <div class="cat">
         <span>Allergen key</span>
-        <span class="pill">14 items · ${blocked.size} selected</span>
+        <span class="pill">${ALLERGENS.length} items · ${blocked.size} allergen(s) · ${dietSelectedCount} diet</span>
       </div>
       <div class="hint">Select allergen(s) to remove from list.</div>
     `;
@@ -882,14 +961,42 @@ function renderMenu(){
   clearBtn.type = "button";
   clearBtn.className = "btn";
   clearBtn.textContent = "Clear filters";
-  clearBtn.disabled = localAllergens.size === 0;
+  clearBtn.disabled = localAllergens.size === 0 && !dietFilters.vegan && !dietFilters.glutenFree;
   clearBtn.onclick = () => {
-    if(localAllergens.size === 0) return;
+    if(localAllergens.size === 0 && !dietFilters.vegan && !dietFilters.glutenFree) return;
     localAllergens.clear();
+    dietFilters = { vegan: false, glutenFree: false };
     saveLocalAllergens();
+    saveDietFilters();
     render();
   };
   legendActions.appendChild(clearBtn);
+
+  const veganBtn = document.createElement("button");
+  veganBtn.type = "button";
+  veganBtn.className = "btn";
+  veganBtn.textContent = "Vegan only";
+  veganBtn.setAttribute("aria-pressed", dietFilters.vegan ? "true" : "false");
+  if(dietFilters.vegan) veganBtn.classList.add("active");
+  veganBtn.onclick = () => {
+    dietFilters.vegan = !dietFilters.vegan;
+    saveDietFilters();
+    render();
+  };
+  legendActions.appendChild(veganBtn);
+
+  const gfBtn = document.createElement("button");
+  gfBtn.type = "button";
+  gfBtn.className = "btn";
+  gfBtn.textContent = "Gluten-free only";
+  gfBtn.setAttribute("aria-pressed", dietFilters.glutenFree ? "true" : "false");
+  if(dietFilters.glutenFree) gfBtn.classList.add("active");
+  gfBtn.onclick = () => {
+    dietFilters.glutenFree = !dietFilters.glutenFree;
+    saveDietFilters();
+    render();
+  };
+  legendActions.appendChild(gfBtn);
 
   const legendList = document.createElement("div");
   legendList.className = "legend";
@@ -911,14 +1018,14 @@ function renderMenu(){
   menuEl.appendChild(legendDetails);
 
   MENU.forEach(section => {
-    const allowed = section.items.filter(it => !itemBlockedByAllergens(it, blocked));
+    const allowed = section.items.filter(it => !itemBlockedByAllergens(it, blocked) && itemMatchesDiet(it));
     totalItems += allowed.length;
     const items = allowed.filter(it => menuItemMatchesSearch(it, q));
     if(items.length === 0) return;
     shownItems += items.length;
 
     const det = document.createElement("details");
-    det.open = q.length > 0 || openCats.has(section.category);
+    det.open = openCats.has(section.category);
     det.addEventListener("toggle", () => {
       if(det.open) openCats.add(section.category);
       else openCats.delete(section.category);
@@ -1281,6 +1388,7 @@ window.addEventListener("keydown", (e) => {
 
 setConn(false, "Disconnected");
 loadLocalAllergens();
+loadDietFilters();
 loadRoomHistory();
 updateRoomHistoryUI();
 connect();
