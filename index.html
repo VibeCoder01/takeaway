@@ -65,6 +65,11 @@
       border-radius:14px; padding:10px 12px; outline:none;
     }
     .input{min-width:200px}
+    .searchMode{display:inline-flex; gap:6px; align-items:center;}
+    .searchMode .btn.active{
+      border-color: rgba(34,197,94,.45);
+      background: rgba(34,197,94,.14);
+    }
 
     /* Fix the “white on white” select/options problem */
     .select{
@@ -72,7 +77,6 @@
       background: rgba(0,0,0,.25);
       color: var(--text);
     }
-    #roomHistory{min-width:140px;}
     select option{
       background: #0b1020;
       color: #e9ecf5;
@@ -81,6 +85,7 @@
     .btn{cursor:pointer; transition:transform .05s ease, background .2s ease, border-color .2s ease; user-select:none; display:inline-flex; align-items:center; gap:8px;}
     .btn:hover{background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.18);}
     .btn:active{transform:translateY(1px);}
+    .btn.small{font-size:12px; padding:6px 10px; border-radius:999px;}
     .btn:disabled{
       opacity:.45;
       cursor:not-allowed;
@@ -97,13 +102,16 @@
     .chip.ok{border-color:rgba(34,197,94,.45); background:rgba(34,197,94,.12);}
     .chip.bad{border-color:rgba(239,68,68,.45); background:rgba(239,68,68,.10);}
     main .wrap{padding-top:18px; padding-bottom:40px;}
-    .grid{display:grid; grid-template-columns:1.25fr .85fr; gap:16px; align-items:start;}
+    .grid{display:grid; grid-template-columns:1.15fr 1fr; gap:16px; align-items:start;}
     @media (max-width:980px){.grid{grid-template-columns:1fr}.input{min-width:100%}.title{min-width:unset}}
     .card{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;}
     .cardhead{padding:14px; display:flex; gap:10px; align-items:flex-end; justify-content:space-between; border-bottom:1px solid var(--line); background:rgba(0,0,0,.12);}
     .cardhead h2{margin:0; font-size:24px; letter-spacing:.4px;}
     .hint{color:var(--muted); font-size:12px}
     .menu{padding:10px; display:flex; flex-direction:column; gap:10px;}
+    .menuHeadActions{display:flex; flex-direction:column; align-items:flex-end; gap:8px;}
+    .menuActions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
+    .menuActions .btn{font-size:12px; padding:6px 10px; border-radius:999px;}
     .legend{
       padding:10px 10px 6px;
       display:grid;
@@ -352,14 +360,11 @@
         </div>
       </div>
       <div class="controls">
-        <span id="connStatus" class="chip bad">Disconnected</span>
-        <span class="sep" aria-hidden="true"></span>
-        <label class="fieldLabel" for="room">Room</label>
-        <input id="room" class="input" style="min-width:140px" placeholder="room" value="default" />
-        <select id="roomHistory" class="select" title="Recent rooms"></select>
-        <span class="sep" aria-hidden="true"></span>
         <input id="search" class="input" type="search" placeholder="Search dishes (name / description / number)…" />
-        <button class="btn danger" id="deleteRoomBtn" title="Delete this room for everyone">Delete room</button>
+        <div class="searchMode" role="group" aria-label="Search mode">
+          <button class="btn small active" id="searchModeAnd" type="button" aria-pressed="true">AND</button>
+          <button class="btn small" id="searchModeOr" type="button" aria-pressed="false">OR</button>
+        </div>
       </div>
     </div>
   </div>
@@ -374,7 +379,13 @@
             <h2>Menu</h2>
             <div class="hint">Add/Pick a person, add items.</div>
           </div>
-          <div class="hint" id="menuCount"></div>
+          <div class="menuHeadActions">
+            <div class="hint" id="menuCount"></div>
+            <div class="menuActions">
+              <button class="btn" id="menuExpandAllBtn" type="button">Expand all</button>
+              <button class="btn" id="menuCloseAllBtn" type="button">Close all</button>
+            </div>
+          </div>
         </div>
         <div class="menu" id="menu"></div>
       </section>
@@ -433,12 +444,6 @@
 <script>
 /* ===================== FULL MENU (literal JS data) ===================== */
 const MENU = [
-  {"category":"SPECIAL SET MEALS","items":[
-    {"id":"A","name":"Set Meal A / Per Person (Minimum for 2 persons)","price":30.9,"desc":"Mixed Hors D'oeuvres (Crispy Seaweed, Sesame Prawns on Toast, Crispy Won Ton, Satay Chicken on Skewers, Barbecued Spare Ribs). Crispy Aromatic Duck / Crispy Lamb. Peking Kung Po Chicken. Sizzling Fillet Steak with Black Pepper sauce. Fried Mixed Vegetables. Egg Fried Rice."},
-    {"id":"B","name":"Set Meal B / Per Person (Minimum for 2 persons)","price":31.9,"desc":"House Hors D'oeuvres (Crispy Seaweed, Butterfly Prawns, Smoked Spicy Shredded Chicken, Vegetarian Spring Rolls, Peking Spare Ribs). Crispy Aromatic Duck / Crispy Lamb. Shredded Chilli Beef. Sizzling King Prawns in Mandarin Sauce. Stir Fried Chicken with Mange Tout. Special Fried Rice."},
-    {"id":"C","name":"Set Meal C / Per Person (Minimum for 2 persons)","price":27.5,"desc":"Vegetarian Hors D'oeuvres (Crispy Seaweed, Crispy Vegetarian Spring Rolls, Fried Beancurds in Peppercorn Salt, Curry Samosa). Crispy Vegetarian Duck. Sizzling Vegetarian Chicken Black Bean. Sizzling Beancurd with Satay Sauce. Fried Mange Tout with Beansprouts. Mixed Vegetable Fried Rice."},
-    {"id":"D","name":"Set Meal D / Per Person (Minimum for 2 persons)","price":59.9,"desc":"Special Seafood Hors D'oeuvres (Crispy Seaweed, Paper Wrapped Prawns, Squid in Peppercorn Salt, Crispy Fried Scallops in Batter, Satay Prawns on Skewers). Baked Lobster. Sizzling Mandarin Fillet Steak. Stir Fried King Prawns with Asparagus. Chinese Vegetables with Oyster Sauce. Lotus Leaf Fried Rice."}
-  ]},
   {"category":"APPETISERS","items":[
     {"id":"1","name":"Hot Mix Special (Minimum for 2)","price":18.2,"desc":"Crispy Seaweed, Satay Chicken on Skewers, Crispy Won Ton, Sesame Prawns on Toast and Dry Barbecued Spare Ribs. Contains: Wheat, Crustaceans, Nut, Sesame, Soya."},
     {"id":"2","name":"House Hors D'oeuvres (Minimum for 2)","price":19.2,"desc":"Crispy Seaweed, Butterfly Prawns, Smoked Spicy Shredded Chicken, Peking Spare Ribs and Vegetarian Spring Rolls. Contains: Crustaceans, Egg, Soya, Celery."},
@@ -614,6 +619,12 @@ const MENU = [
     {"id":"146","name":"Mixed Vegetable Chow Mein","price":6.9,"desc":"Vegan. Contains: Soya."},
     {"id":"147","name":"Noodles with Beansprouts","price":5.9,"desc":"Vegan. Contains: Soya."},
     {"id":"148","name":"Plain Noodles","price":5.9,"desc":"Vegan. Contains: Soya."}
+  ]},
+  {"category":"SPECIAL SET MEALS","items":[
+    {"id":"A","name":"Set Meal A / Per Person (Minimum for 2 persons)","price":30.9,"desc":"Mixed Hors D'oeuvres (Crispy Seaweed, Sesame Prawns on Toast, Crispy Won Ton, Satay Chicken on Skewers, Barbecued Spare Ribs). Crispy Aromatic Duck / Crispy Lamb. Peking Kung Po Chicken. Sizzling Fillet Steak with Black Pepper sauce. Fried Mixed Vegetables. Egg Fried Rice."},
+    {"id":"B","name":"Set Meal B / Per Person (Minimum for 2 persons)","price":31.9,"desc":"House Hors D'oeuvres (Crispy Seaweed, Butterfly Prawns, Smoked Spicy Shredded Chicken, Vegetarian Spring Rolls, Peking Spare Ribs). Crispy Aromatic Duck / Crispy Lamb. Shredded Chilli Beef. Sizzling King Prawns in Mandarin Sauce. Stir Fried Chicken with Mange Tout. Special Fried Rice."},
+    {"id":"C","name":"Set Meal C / Per Person (Minimum for 2 persons)","price":27.5,"desc":"Vegetarian Hors D'oeuvres (Crispy Seaweed, Crispy Vegetarian Spring Rolls, Fried Beancurds in Peppercorn Salt, Curry Samosa). Crispy Vegetarian Duck. Sizzling Vegetarian Chicken Black Bean. Sizzling Beancurd with Satay Sauce. Fried Mange Tout with Beansprouts. Mixed Vegetable Fried Rice."},
+    {"id":"D","name":"Set Meal D / Per Person (Minimum for 2 persons)","price":59.9,"desc":"Special Seafood Hors D'oeuvres (Crispy Seaweed, Paper Wrapped Prawns, Squid in Peppercorn Salt, Crispy Fried Scallops in Batter, Satay Prawns on Skewers). Baked Lobster. Sizzling Mandarin Fillet Steak. Stir Fried King Prawns with Asparagus. Chinese Vegetables with Oyster Sauce. Lotus Leaf Fried Rice."}
   ]}
 ];
 
@@ -621,6 +632,7 @@ const MENU = [
 let ws = null;
 let serverVersion = 0;
 let state = { people: [], activePersonId: null, ui: { search: "" } };
+let searchMode = "and";
 let openCats = new Set();
 let localAllergens = new Set();
 let roomHistory = [];
@@ -681,7 +693,7 @@ function updateRoomHistoryUI(){
   sel.innerHTML = "";
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = "Recent rooms";
+  placeholder.textContent = "Recent sessions";
   sel.appendChild(placeholder);
   roomHistory.forEach(r => {
     const opt = document.createElement("option");
@@ -726,6 +738,7 @@ const money = (n) => "£" + (Math.round((n + Number.EPSILON) * 100) / 100).toFix
 
 function setConn(ok, text){
   const chip = $("connStatus");
+  if(!chip) return;
   chip.classList.toggle("ok", ok);
   chip.classList.toggle("bad", !ok);
   chip.textContent = text;
@@ -769,10 +782,28 @@ function grandTotal(){
   return state.people.reduce((sum, p) => sum + personTotal(p), 0);
 }
 
-function menuItemMatchesSearch(item, q){
-  if(!q) return true;
+function menuItemMatchesSearch(item, terms, mode){
+  if(terms.length === 0) return true;
   const hay = `${item.id} ${item.name} ${(item.desc||"")}`.toLowerCase();
-  return hay.includes(q);
+  if(mode === "or") return terms.some(t => hay.includes(t));
+  return terms.every(t => hay.includes(t));
+}
+
+function getSearchTerms(){
+  const raw = ($("search").value || "").trim().toLowerCase();
+  if(!raw) return [];
+  return raw.split(/\s+/).filter(Boolean);
+}
+
+function setSearchMode(mode){
+  searchMode = mode === "or" ? "or" : "and";
+  const andBtn = $("searchModeAnd");
+  const orBtn = $("searchModeOr");
+  andBtn.classList.toggle("active", searchMode === "and");
+  orBtn.classList.toggle("active", searchMode === "or");
+  andBtn.setAttribute("aria-pressed", searchMode === "and" ? "true" : "false");
+  orBtn.setAttribute("aria-pressed", searchMode === "or" ? "true" : "false");
+  render();
 }
 
 function itemAllergens(item){
@@ -830,8 +861,18 @@ function sendPatch(){
   }));
 }
 
+function getRoomValue(){
+  const input = $("room");
+  return (input && input.value.trim()) ? input.value.trim() : "default";
+}
+
+function setRoomValue(value){
+  const input = $("room");
+  if(input) input.value = value;
+}
+
 function connect(){
-  const room = ($("room").value.trim() || "default");
+  const room = getRoomValue();
   const wsUrl = `ws://${location.host}/ws`;
 
   if(ws) try { ws.close(); } catch {}
@@ -850,19 +891,19 @@ function connect(){
       return;
     }
     if(msg.type === "room_deleted"){
-      const room = msg.room || $("room").value.trim() || "default";
-      setConn(false, "Room deleted");
+      const room = msg.room || getRoomValue();
+      setConn(false, "Session deleted");
       removeRoomFromHistory(room);
       state = { people: [], activePersonId: null, ui: { search: "" } };
       render();
-      $("room").value = "default";
+      setRoomValue("default");
       connect();
       return;
     }
     if(msg.type === "full_state"){
       serverVersion = msg.version || 0;
       state = msg.state;
-      setConn(true, `In Room : ${msg.room}`);
+      setConn(true, "Connected");
       render();
     }
   };
@@ -932,6 +973,7 @@ function renderPeopleControls(){
 
 function renderMenu(){
   const q = ($("search").value || "").trim().toLowerCase();
+  const terms = getSearchTerms();
   const menuEl = $("menu");
   menuEl.innerHTML = "";
 
@@ -1020,12 +1062,12 @@ function renderMenu(){
   MENU.forEach(section => {
     const allowed = section.items.filter(it => !itemBlockedByAllergens(it, blocked) && itemMatchesDiet(it));
     totalItems += allowed.length;
-    const items = allowed.filter(it => menuItemMatchesSearch(it, q));
+    const items = allowed.filter(it => menuItemMatchesSearch(it, terms, searchMode));
     if(items.length === 0) return;
     shownItems += items.length;
 
     const det = document.createElement("details");
-    det.open = openCats.has(section.category);
+    det.open = q ? true : openCats.has(section.category);
     det.addEventListener("toggle", () => {
       if(det.open) openCats.add(section.category);
       else openCats.delete(section.category);
@@ -1108,6 +1150,15 @@ function renderMenu(){
     setCartQty(p, key, next);
     sendPatch();
   }
+}
+
+function setMenuAccordionsOpen(open){
+  openCats.clear();
+  if(open){
+    openCats.add("allergen-key");
+    MENU.forEach(section => openCats.add(section.category));
+  }
+  render();
 }
 
 function renderCart(){
@@ -1321,22 +1372,33 @@ async function copySummary(){
 
 /* UI hooks */
 $("search").addEventListener("input", render);
-$("roomHistory").addEventListener("change", (e) => {
-  const val = e.target.value;
-  if(!val) return;
-  $("room").value = val;
-  connect();
-});
-$("room").addEventListener("change", connect);
-$("deleteRoomBtn").addEventListener("click", () => {
-  const room = ($("room").value.trim() || "default");
-  if(!confirm(`Delete room "${room}" for everyone? This cannot be undone.`)) return;
-  if(!ws || ws.readyState !== WebSocket.OPEN){
-    alert("Not connected to the server.");
-    return;
-  }
-  ws.send(JSON.stringify({ type: "delete_room" }));
-});
+$("searchModeAnd").addEventListener("click", () => setSearchMode("and"));
+$("searchModeOr").addEventListener("click", () => setSearchMode("or"));
+$("menuExpandAllBtn").addEventListener("click", () => setMenuAccordionsOpen(true));
+$("menuCloseAllBtn").addEventListener("click", () => setMenuAccordionsOpen(false));
+const roomHistorySelect = $("roomHistory");
+if(roomHistorySelect){
+  roomHistorySelect.addEventListener("change", (e) => {
+    const val = e.target.value;
+    if(!val) return;
+    setRoomValue(val);
+    connect();
+  });
+}
+const roomInput = $("room");
+if(roomInput) roomInput.addEventListener("change", connect);
+const deleteRoomBtn = $("deleteRoomBtn");
+if(deleteRoomBtn){
+  deleteRoomBtn.addEventListener("click", () => {
+    const room = getRoomValue();
+    if(!confirm(`Delete session "${room}" for everyone? This cannot be undone.`)) return;
+    if(!ws || ws.readyState !== WebSocket.OPEN){
+      alert("Not connected to the server.");
+      return;
+    }
+    ws.send(JSON.stringify({ type: "delete_room" }));
+  });
+}
 
 $("addPersonBtn").addEventListener("click", () => {
   const name = prompt("Person name?");
@@ -1346,7 +1408,7 @@ $("addPersonBtn").addEventListener("click", () => {
   if(!trimmed) return;
   const exists = state.people.some(p => p.name.trim().toLowerCase() === trimmed.toLowerCase());
   if(exists){
-    alert("That name already exists in this room.");
+    alert("That name already exists in this session.");
     return;
   }
   const p = { id: uid(), name: trimmed, cart: {} };

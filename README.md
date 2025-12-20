@@ -3,10 +3,11 @@
 A realtime, browser-based menu picker for shared ordering. The UI is a single `index.html` file served by a lightweight `aiohttp` websocket server.
 
 ## Features
-- Realtime shared room state with per-room people and carts
+- Realtime shared session state with per-room people and carts
 - Local allergen filters (per browser) with persistent selection
 - Vegan-only and gluten-free-only filters stored in `localStorage`
-- Room history dropdown saved in `localStorage`
+- Multi-term search with AND/OR matching that expands matching sections
+- Menu “Expand all” / “Close all” controls
 - “Show ALL selected food.” modal with per-person collapse/expand controls
 
 ## Project Layout
@@ -31,19 +32,19 @@ Then open:
 
 ## Usage Notes
 - Rooms are in-memory only; restarting the server clears all rooms.
-- The room name is set in the header. Changing it reconnects automatically.
+- The UI connects to the default room; room handling is still supported server-side.
 - Allergen and diet filters are per-browser and stored in `localStorage`.
 - Duplicate person names are blocked per room.
+- The server logs key user actions with timestamps in the console.
 
 ## Filtering
 - Open “Allergen key” and toggle allergens to exclude matching items.
 - Use “Vegan only” or “Gluten-free only” to keep just those items.
 - “Clear filters” resets both allergen and diet filters.
+- Use search terms separated by spaces, then toggle AND/OR to control matching.
 
 ## Common Tasks
 - Add a person: click “＋ Add person”
-- Switch rooms: use the room input or “Recent rooms” dropdown
-- Delete a room: click “Delete room” (clears it for everyone)
 - Filter menu: open “Allergen key” and toggle allergens, Vegan only, or Gluten-free only
 
 ## License
