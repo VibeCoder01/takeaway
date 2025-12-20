@@ -12,6 +12,7 @@ A realtime, browser-based menu picker for shared ordering. The UI is a single `i
 
 ## Project Layout
 - `index.html` — UI, styling, and client-side logic
+- `menu.json` — menu data and title used by the UI
 - `server.py` — aiohttp server and websocket room/state handling
 
 ## Selections are Highlighted
@@ -45,6 +46,7 @@ Then open:
 - Allergen and diet filters are per-browser and stored in `localStorage`.
 - Duplicate person names are blocked per room.
 - The server logs key user actions with timestamps in the console.
+- Menu data is loaded from `menu.json`, so serve the UI over HTTP.
 
 ## Filtering
 - Open “Allergen key” and toggle allergens to exclude matching items.

@@ -259,9 +259,14 @@ async def index_handler(request: web.Request):
     return web.FileResponse("index.html")
 
 
+async def menu_handler(request: web.Request):
+    return web.FileResponse("menu.json")
+
+
 def main():
     app = web.Application()
     app.router.add_get("/", index_handler)
+    app.router.add_get("/menu.json", menu_handler)
     app.router.add_get("/ws", ws_handler)
     web.run_app(app, host=HOST, port=PORT)
 
