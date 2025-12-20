@@ -14,6 +14,15 @@ A realtime, browser-based menu picker for shared ordering. The UI is a single `i
 - `index.html` — UI, styling, and client-side logic
 - `server.py` — aiohttp server and websocket room/state handling
 
+## Selections are Highlighted
+<img width="1211" height="926" alt="image" src="https://github.com/user-attachments/assets/b4191106-ad67-4be4-90e7-85d8aaa38388" />
+
+## Showing everyone's selections
+<img width="1024" height="687" alt="image" src="https://github.com/user-attachments/assets/a4ab03a4-3156-4215-bdf3-a42c77013baa" />
+
+## Searching
+<img width="1208" height="883" alt="image" src="https://github.com/user-attachments/assets/ab4bd6d7-6a4e-4175-ba97-28353e97fc08" />
+
 ## Requirements
 - Python 3.9+ recommended
 - `aiohttp`
